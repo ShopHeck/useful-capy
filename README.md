@@ -55,6 +55,8 @@ InterfaceForge/
 
 The project targets iOS 17 and uses SwiftUI only. Xcode generates the app Info.plist and launch screen metadata from build settings.
 
+For App Store release prep, follow the tailored checklist in [`APP_STORE_SUBMISSION_CHECKLIST.md`](APP_STORE_SUBMISSION_CHECKLIST.md).
+
 ## How export packages work
 
 When a user exports, `CodeExportService` builds a small package from the generated design and selected output type.
