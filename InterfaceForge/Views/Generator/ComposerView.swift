@@ -2,7 +2,10 @@ import SwiftUI
 
 struct ComposerView: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
-    @State private var path: [AppRoute] = []
+
+    private var canGenerate: Bool {
+        !viewModel.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.selectedTemplate != nil
+    }
 
     var body: some View {
         ScrollView {
@@ -10,46 +13,17 @@ struct ComposerView: View {
                 StepRail(activeStep: viewModel.selectedStep)
                     .padding(.horizontal, -16)
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Describe the component")
-                        .font(.largeTitle.weight(.black))
-                    Text("Use normal words. InterfaceForge picks a matching local template, adds your style, and prepares export-ready code.")
-                        .foregroundStyle(.secondary)
-                }
+                SectionHeader(
+                    "Describe the component",
+                    eyebrow: "Create",
+                    subtitle: "Start with a sentence or pick a template. Generation stays deterministic and local.",
+                    systemImage: "text.bubble.fill",
+                    theme: viewModel.configuration.theme
+                )
                 .padding(.horizontal)
 
-                GlassCard(radius: 30) {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("What do you want to make?")
-                            .font(.headline)
-                        TextEditor(text: $viewModel.prompt)
-                            .frame(minHeight: 116)
-                            .padding(12)
-                            .scrollContentBackground(.hidden)
-                            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                            .overlay(alignment: .topLeading) {
-                                if viewModel.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    Text("Example: A friendly pricing card for my design course")
-                                        .foregroundStyle(.secondary)
-                                        .padding(.top, 20)
-                                        .padding(.leading, 18)
-                                        .allowsHitTesting(false)
-                                }
-                            }
-                            .accessibilityLabel("Describe your component")
-
-                        Text("Quick starts")
-                            .font(.subheadline.weight(.bold))
-                        FlowLayout(spacing: 8) {
-                            ForEach(viewModel.quickStartPrompts, id: \.self) { prompt in
-                                Chip(title: prompt, isSelected: viewModel.prompt == prompt) {
-                                    viewModel.useQuickStart(prompt)
-                                }
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal)
+                promptCard
+                    .padding(.horizontal)
 
                 TemplatePicker()
                     .padding(.horizontal)
@@ -57,26 +31,21 @@ struct ComposerView: View {
                 StyleControlsView()
                     .padding(.horizontal)
 
-                if viewModel.isGenerating {
-                    GenerationProgressView()
-                        .padding(.horizontal)
-                } else {
-                    PrimaryButton(title: "Generate interface", systemImage: "wand.and.stars", theme: viewModel.configuration.theme) {
-                        Task { await viewModel.generate() }
-                    }
-                    .padding(.horizontal)
-                }
+                generationAction
 
                 if viewModel.generatedDesign != nil, !viewModel.isGenerating {
                     NavigationLink(value: AppRoute.preview) {
-                        Label("Open interactive preview", systemImage: "play.rectangle.fill")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 15)
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        SecondaryLinkRow(
+                            title: "Open interactive preview",
+                            subtitle: "Test the generated component before exporting.",
+                            systemImage: "play.rectangle.fill",
+                            theme: viewModel.configuration.theme
+                        )
                     }
+                    .buttonStyle(.plain)
                     .padding(.horizontal)
                     .accessibilityLabel("Open interactive preview")
+                    .accessibilityHint("Shows the generated component with live interactions")
                 }
             }
             .padding(.vertical, 18)
@@ -86,6 +55,89 @@ struct ComposerView: View {
         .appBackground(theme: viewModel.configuration.theme)
         .onAppear { viewModel.selectedStep = .describe }
     }
+
+    private var promptCard: some View {
+        GlassCard(radius: 30) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top, spacing: 12) {
+                    GradientIconBadge(systemImage: "pencil.and.scribble", theme: viewModel.configuration.theme, size: 42)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("What should the UI do?")
+                            .font(.headline)
+                        Text("Mention the product, audience, or goal. Short prompts work well.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $viewModel.prompt)
+                        .frame(minHeight: 132)
+                        .padding(12)
+                        .scrollContentBackground(.hidden)
+                        .background(Color(.secondarySystemBackground).opacity(0.86), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .stroke(viewModel.configuration.theme.accent.opacity(viewModel.prompt.isEmpty ? 0.14 : 0.34), lineWidth: 1)
+                        )
+                        .accessibilityLabel("Describe your component")
+                        .accessibilityHint("Type a short description such as a friendly pricing card for a design course")
+
+                    if viewModel.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text("Example: A friendly pricing card for my design course with a clear start button")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 20)
+                            .padding(.leading, 18)
+                            .padding(.trailing, 18)
+                            .allowsHitTesting(false)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Quick starts")
+                        .font(.subheadline.weight(.bold))
+                    FlowLayout(spacing: 8) {
+                        ForEach(viewModel.quickStartPrompts, id: \.self) { prompt in
+                            Chip(title: prompt, isSelected: viewModel.prompt == prompt, theme: viewModel.configuration.theme) {
+                                viewModel.useQuickStart(prompt)
+                            }
+                        }
+                    }
+                }
+
+                if !canGenerate {
+                    Label("Add a prompt or select a template to enable generation.", systemImage: "info.circle")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel("Add a prompt or select a template to enable generation")
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var generationAction: some View {
+        if viewModel.isGenerating {
+            GenerationProgressView()
+                .padding(.horizontal)
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                PrimaryButton(title: "Generate interface", systemImage: "wand.and.stars", theme: viewModel.configuration.theme, isEnabled: canGenerate) {
+                    guard canGenerate else { return }
+                    Task { await viewModel.generate() }
+                }
+                .accessibilityHint(canGenerate ? "Creates a local component from your prompt and selected style" : "Add a prompt or select a template first")
+
+                if viewModel.generatedDesign != nil {
+                    Text("Generated. Continue to preview, or adjust customization and generate again.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
 }
 
 struct TemplatePicker: View {
@@ -93,46 +145,83 @@ struct TemplatePicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Template")
-                    .font(.headline)
-                Spacer()
-                Text("Auto if none selected")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            SectionHeader(
+                "Choose a starting point",
+                subtitle: "Optional. Pick one to skip prompt matching and generate from a known component pattern.",
+                systemImage: "rectangle.stack.fill",
+                theme: viewModel.configuration.theme
+            )
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(DesignTemplate.all) { template in
-                        Button {
-                            viewModel.selectedTemplate = template
-                        } label: {
-                            VStack(alignment: .leading, spacing: 10) {
-                                Image(systemName: template.iconName)
-                                    .font(.title2)
-                                    .foregroundStyle(viewModel.configuration.theme.gradient)
-                                Text(template.title)
-                                    .font(.headline)
-                                Text(template.shortDescription)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
+                        TemplateCard(template: template, isSelected: viewModel.selectedTemplate?.id == template.id) {
+                            withAnimation(.spring(response: 0.32, dampingFraction: 0.84)) {
+                                viewModel.selectedTemplate = template
                             }
-                            .frame(width: 180, alignment: .leading)
-                            .padding(16)
-                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                    .stroke(viewModel.selectedTemplate?.id == template.id ? viewModel.configuration.theme.accent : .clear, lineWidth: 2)
-                            )
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Template \(template.title)")
                     }
                 }
+                .padding(.vertical, 2)
             }
         }
+    }
+}
+
+private struct TemplateCard: View {
+    @EnvironmentObject private var viewModel: GeneratorViewModel
+    let template: DesignTemplate
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top) {
+                    GradientIconBadge(systemImage: template.iconName, theme: viewModel.configuration.theme, size: 42)
+                    Spacer()
+                    if isSelected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(.white)
+                            .accessibilityHidden(true)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(template.title)
+                        .font(.headline)
+                    Text(template.shortDescription)
+                        .font(.caption)
+                        .foregroundStyle(isSelected ? .white.opacity(0.84) : .secondary)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Text(isSelected ? "Selected template" : "Tap to select")
+                    .font(.caption.weight(.bold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .foregroundStyle(isSelected ? viewModel.configuration.theme.accent : .secondary)
+                    .background(isSelected ? AnyShapeStyle(Color.white) : AnyShapeStyle(.thinMaterial), in: Capsule())
+            }
+            .frame(width: 190, minHeight: 176, alignment: .topLeading)
+            .padding(16)
+            .foregroundStyle(isSelected ? .white : .primary)
+            .background(cardBackground, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .strokeBorder(isSelected ? Color.white.opacity(0.34) : Color.white.opacity(0.26), lineWidth: 1)
+            )
+            .shadow(color: viewModel.configuration.theme.accent.opacity(isSelected ? 0.24 : 0.08), radius: isSelected ? 22 : 12, y: isSelected ? 12 : 6)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Template \(template.title)")
+        .accessibilityHint(isSelected ? "Selected template" : "Selects this template for generation")
+    }
+
+    private var cardBackground: some ShapeStyle {
+        isSelected ? AnyShapeStyle(viewModel.configuration.theme.gradient) : AnyShapeStyle(.ultraThinMaterial)
     }
 }
 
@@ -142,44 +231,76 @@ struct StyleControlsView: View {
     var body: some View {
         GlassCard(radius: 30) {
             VStack(alignment: .leading, spacing: 18) {
-                HStack {
-                    Text("Customize")
-                        .font(.headline)
-                    Spacer()
-                    Label("Live updates", systemImage: "bolt.fill")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(viewModel.configuration.theme.accent)
+                HStack(alignment: .top, spacing: 12) {
+                    GradientIconBadge(systemImage: "slider.horizontal.3", theme: viewModel.configuration.theme, size: 42)
+                    SectionHeader(
+                        "Customize",
+                        eyebrow: "Live style",
+                        subtitle: "Changes refresh the preview and export package when a component exists.",
+                        theme: viewModel.configuration.theme
+                    )
+                    Spacer(minLength: 0)
                 }
 
-                Picker("Color theme", selection: $viewModel.configuration.theme) {
-                    ForEach(ColorTheme.allCases) { theme in
-                        Text(theme.rawValue).tag(theme)
-                    }
-                }
-                .pickerStyle(.segmented)
+                ControlChipGroup(
+                    title: "Color theme",
+                    options: ColorTheme.allCases,
+                    selection: $viewModel.configuration.theme,
+                    theme: viewModel.configuration.theme,
+                    label: { $0.rawValue }
+                )
                 .accessibilityLabel("Color theme")
 
-                Picker("Visual style", selection: $viewModel.configuration.visualStyle) {
-                    ForEach(VisualStyle.allCases) { style in
-                        Text(style.rawValue).tag(style)
-                    }
-                }
+                ControlChipGroup(
+                    title: "Visual style",
+                    options: VisualStyle.allCases,
+                    selection: $viewModel.configuration.visualStyle,
+                    theme: viewModel.configuration.theme,
+                    label: { $0.rawValue }
+                )
                 .accessibilityLabel("Visual style")
 
-                Picker("Motion level", selection: $viewModel.configuration.motionLevel) {
-                    ForEach(MotionLevel.allCases) { motion in
-                        Text(motion.rawValue).tag(motion)
-                    }
-                }
-                .pickerStyle(.segmented)
+                ControlChipGroup(
+                    title: "Motion level",
+                    options: MotionLevel.allCases,
+                    selection: $viewModel.configuration.motionLevel,
+                    theme: viewModel.configuration.theme,
+                    label: { $0.rawValue }
+                )
                 .accessibilityLabel("Motion level")
 
-                Picker("Export format", selection: $viewModel.configuration.outputType) {
-                    ForEach(OutputType.allCases) { outputType in
-                        Text(outputType.rawValue).tag(outputType)
+                ControlChipGroup(
+                    title: "Export format",
+                    options: OutputType.allCases,
+                    selection: $viewModel.configuration.outputType,
+                    theme: viewModel.configuration.theme,
+                    label: { $0.rawValue }
+                )
+                .accessibilityLabel("Target platform or output type")
+            }
+        }
+    }
+}
+
+private struct ControlChipGroup<Value: Hashable & Identifiable>: View {
+    let title: String
+    let options: [Value]
+    @Binding var selection: Value
+    let theme: ColorTheme
+    let label: (Value) -> String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text(title)
+                .font(.subheadline.weight(.black))
+            FlowLayout(spacing: 8) {
+                ForEach(options) { option in
+                    Chip(title: label(option), isSelected: selection == option, theme: theme) {
+                        withAnimation(.spring(response: 0.28, dampingFraction: 0.86)) {
+                            selection = option
+                        }
                     }
                 }
-                .accessibilityLabel("Target platform or output type")
             }
         }
     }
@@ -193,16 +314,15 @@ struct GenerationProgressView: View {
         GlassCard(radius: 30) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 12) {
-                    Image(systemName: "sparkles")
-                        .font(.title)
-                        .foregroundStyle(viewModel.configuration.theme.gradient)
-                        .scaleEffect(sparkle ? 1.16 : 0.9)
+                    GradientIconBadge(systemImage: "sparkles", theme: viewModel.configuration.theme, size: 44)
+                        .scaleEffect(sparkle ? 1.08 : 0.94)
                         .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: sparkle)
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("Generating locally")
                             .font(.headline)
                         Text(viewModel.progressMessage)
                             .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 ProgressView(value: viewModel.generationProgress)
@@ -211,5 +331,6 @@ struct GenerationProgressView: View {
         }
         .onAppear { sparkle = true }
         .accessibilityLabel("Generation progress")
+        .accessibilityHint("Creates the component locally from built-in templates")
     }
 }
