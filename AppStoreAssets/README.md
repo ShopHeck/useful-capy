@@ -1,28 +1,44 @@
 # InterfaceForge App Store Assets
 
-Store generated App Store Connect deliverables here. Keep final screenshot PNGs, source mockups, export notes, and the final app icon asset in this directory so release materials stay separate from app source code.
+Generated App Store Connect deliverables live here so release materials stay separate from app source code. These screenshots use conservative, review-safe copy: user-provided OpenAI-compatible provider, remote prompt requests, labeled fallback templates, and starter code exports rather than production guarantees.
 
-## Required screenshot dimensions to generate
+## Included assets
 
-InterfaceForge is a universal iOS app, so prepare screenshots for iPhone and iPad placements:
+### App icon
 
-- iPhone 6.9-inch portrait: 1320×2868 PNG
-- iPhone 6.5-inch portrait: 1242×2688 PNG
-- iPad Pro 13-inch portrait: 2048×2732 PNG
+- `AppIcon-1024.png` — 1024×1024 PNG, RGB, no transparency.
+- `../InterfaceForge/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png` — same production icon wired into the Xcode app icon asset catalog.
 
-App Store Connect may allow using the largest required sizes to scale smaller device classes, but keep these source dimensions available for review and future updates.
+### iPhone 6.9-inch portrait screenshots — 1320×2868 PNG
 
-## App icon
+- `Screenshots/iPhone-6.9/01-home-1320x2868.png`
+- `Screenshots/iPhone-6.9/02-create-1320x2868.png`
+- `Screenshots/iPhone-6.9/03-preview-1320x2868.png`
+- `Screenshots/iPhone-6.9/04-export-1320x2868.png`
 
-- App icon: 1024×1024 PNG, no transparency, production artwork only
-- Add the final bitmap to `InterfaceForge/Assets.xcassets/AppIcon.appiconset/` and update that appiconset `Contents.json` with the filename when artwork is ready.
-- Do not submit placeholder artwork or transparent icons.
+### iPhone 6.5-inch portrait screenshots — 1242×2688 PNG
 
-## Recommended screenshot sequence
+- `Screenshots/iPhone-6.5/01-home-1242x2688.png`
+- `Screenshots/iPhone-6.5/02-create-1242x2688.png`
+- `Screenshots/iPhone-6.5/03-preview-1242x2688.png`
+- `Screenshots/iPhone-6.5/04-export-1242x2688.png`
 
-1. Home — show the AI interface generation value proposition and bring-your-provider-key positioning.
-2. Create / AI Engine — show prompt entry, provider settings, and clear fallback disclosure.
-3. AI Preview — show prompt-specific generated content with AI-powered or template-fallback status visible.
-4. Export — show package contents, copy/share actions, and beginner handoff guide.
+### iPad Pro 13-inch portrait screenshots — 2048×2732 PNG
 
-Use conservative copy: user-provided OpenAI-compatible provider, remote prompt requests, labeled fallback templates, and starter code exports rather than production guarantees.
+- `Screenshots/iPad-Pro-13/01-home-2048x2732.png`
+- `Screenshots/iPad-Pro-13/02-create-2048x2732.png`
+- `Screenshots/iPad-Pro-13/03-preview-2048x2732.png`
+- `Screenshots/iPad-Pro-13/04-export-2048x2732.png`
+
+## Screenshot sequence
+
+1. Home — AI interface generation value proposition and bring-your-provider-key positioning.
+2. Create / AI Engine — prompt entry, provider settings, and clear fallback disclosure.
+3. AI Preview — prompt-specific generated content with AI-powered status visible.
+4. Export — package contents, copy/share actions, and beginner handoff guide.
+
+## Source
+
+- `screenshot-source.html` is the HTML/CSS source used to generate the included marketing screenshots at exact App Store Connect dimensions.
+
+App Store Connect may allow using the largest required screenshots to scale smaller device classes, but these source dimensions are kept available for review and future updates.
