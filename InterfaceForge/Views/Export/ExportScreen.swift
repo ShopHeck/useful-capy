@@ -13,9 +13,9 @@ struct ExportScreen: View {
                     .padding(.horizontal, -16)
 
                 SectionHeader(
-                    "Export package",
-                    eyebrow: "Ready to ship",
-                    subtitle: "Copy everything at once or share the generated folder with code, styles, and beginner setup steps.",
+                    "Export starter package",
+                    eyebrow: "Handoff ready",
+                    subtitle: "Copy all files or share the generated folder. Exports are beginner-friendly starter code and include setup notes for the selected format.",
                     systemImage: "shippingbox.fill",
                     theme: viewModel.configuration.theme
                 )
@@ -33,27 +33,16 @@ struct ExportScreen: View {
                     BeginnerGuideCard(package: package)
                         .padding(.horizontal)
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        SectionHeader(
-                            "Files in this package",
-                            subtitle: "Open a row to inspect the exact text that will be copied or shared.",
-                            systemImage: "folder.fill",
-                            theme: viewModel.configuration.theme
-                        )
-                        ForEach(package.files) { file in
-                            FilePreviewRow(file: file, isExpanded: selectedFileID == file.id) {
-                                withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
-                                    selectedFileID = selectedFileID == file.id ? nil : file.id
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
+                    filesSection(package: package)
+                        .padding(.horizontal)
                 } else {
-                    ContentUnavailableView("Nothing to export", systemImage: "shippingbox", description: Text("Generate an interface first, then return to export the package."))
+                    ContentUnavailableView("Nothing to export", systemImage: "shippingbox", description: Text("Generate an interface first, then return to export the starter package."))
+                        .padding(.horizontal)
                 }
             }
+            .readableContentFrame(maxWidth: 980)
             .padding(.vertical, 18)
+            .frame(maxWidth: .infinity)
         }
         .navigationTitle("Export")
         .navigationBarTitleDisplayMode(.inline)
@@ -66,15 +55,16 @@ struct ExportScreen: View {
 
     private var outputPicker: some View {
         GlassCard(radius: 24) {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top, spacing: 12) {
                     GradientIconBadge(systemImage: "chevron.left.forwardslash.chevron.right", theme: viewModel.configuration.theme, size: 40)
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Choose export format")
                             .font(.headline)
-                        Text("Switching formats rebuilds the package before you copy or share.")
+                        Text("Switching formats rebuilds the package so copied and shared files match the selected output.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
@@ -89,48 +79,92 @@ struct ExportScreen: View {
                     viewModel.makeExportPackage(outputType: outputType)
                 }
                 .accessibilityLabel("Export format")
-                .accessibilityHint("Selects the code format for the generated package")
+                .accessibilityHint("Selects the code format for the generated starter package")
             }
         }
         .padding(.horizontal)
     }
 
     private func actionBar(package: ExportPackage) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 12) {
-                Button {
-                    UIPasteboard.general.string = package.combinedText
-                    withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) { copied = true }
-                } label: {
-                    Label(copied ? "Copied" : "Copy all code", systemImage: copied ? "checkmark.circle.fill" : "doc.on.doc.fill")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .foregroundStyle(copied ? .white : .primary)
-                        .background(copied ? AnyShapeStyle(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)) : AnyShapeStyle(.thinMaterial), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(copied ? "Copied code" : "Copy all code")
-                .accessibilityHint("Copies every generated file to the clipboard")
-
-                if let folderURL = viewModel.exportFolderURL {
-                    ShareLink(item: folderURL) {
-                        Label("Share folder", systemImage: "square.and.arrow.up.fill")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .foregroundStyle(.white)
-                            .background(viewModel.configuration.theme.gradient, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        GlassCard(radius: 28) {
+            VStack(alignment: .leading, spacing: 12) {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) {
+                        copyButton(package: package)
+                        shareButton
                     }
-                    .accessibilityLabel("Share package folder")
-                    .accessibilityHint("Opens the iOS share sheet for the generated folder")
+                    VStack(spacing: 12) {
+                        copyButton(package: package)
+                        shareButton
+                    }
+                }
+
+                InfoCallout(
+                    title: "Which action should I use?",
+                    message: "Use Copy all code for pasting into an editor. Use Share folder when handing files to another app or saving the package. Generated files are starter code, not a production guarantee.",
+                    systemImage: "hand.point.up.left.fill",
+                    theme: viewModel.configuration.theme
+                )
+            }
+        }
+    }
+
+    private func copyButton(package: ExportPackage) -> some View {
+        Button {
+            UIPasteboard.general.string = package.combinedText
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) { copied = true }
+        } label: {
+            Label(copied ? "Copied all files" : "Copy all files", systemImage: copied ? "checkmark.circle.fill" : "doc.on.doc.fill")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 50)
+                .foregroundStyle(copied ? .white : .primary)
+                .background(copied ? AnyShapeStyle(LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)) : AnyShapeStyle(.thinMaterial), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(copied ? "Copied all generated files" : "Copy all generated files")
+        .accessibilityHint("Copies every generated file and file name to the clipboard")
+    }
+
+    @ViewBuilder
+    private var shareButton: some View {
+        if let folderURL = viewModel.exportFolderURL {
+            ShareLink(item: folderURL) {
+                Label("Share folder", systemImage: "square.and.arrow.up.fill")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 50)
+                    .foregroundStyle(.white)
+                    .background(viewModel.configuration.theme.gradient, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            }
+            .accessibilityLabel("Share package folder")
+            .accessibilityHint("Opens the iOS share sheet for the generated folder")
+        } else {
+            Label("Preparing share folder", systemImage: "hourglass")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 50)
+                .foregroundStyle(.secondary)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .accessibilityLabel("Preparing share folder")
+        }
+    }
+
+    private func filesSection(package: ExportPackage) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(
+                "Files in this package",
+                subtitle: "Open a row to inspect the exact text included in copy and share. README files explain setup steps in beginner language.",
+                systemImage: "folder.fill",
+                theme: viewModel.configuration.theme
+            )
+            ForEach(package.files) { file in
+                FilePreviewRow(file: file, isExpanded: selectedFileID == file.id) {
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
+                        selectedFileID = selectedFileID == file.id ? nil : file.id
+                    }
                 }
             }
-
-            Text("Tip: share the folder when handing files to another app, or copy all code when pasting into an editor.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -155,10 +189,11 @@ struct PackageSummary: View {
                     }
                 }
 
-                FlowLayout(spacing: 8) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 10)], spacing: 10) {
                     MetricPill(title: package.outputType.rawValue, detail: "Format", systemImage: "doc.text", theme: viewModel.configuration.theme)
                     MetricPill(title: "\(package.files.count) files", detail: "Generated", systemImage: "folder", theme: viewModel.configuration.theme)
                     MetricPill(title: "README", detail: "Guide included", systemImage: "book.closed", theme: viewModel.configuration.theme)
+                    MetricPill(title: "Starter", detail: "Handoff code", systemImage: "graduationcap", theme: viewModel.configuration.theme)
                 }
             }
         }
@@ -177,11 +212,12 @@ struct BeginnerGuideCard: View {
                 HStack(alignment: .top, spacing: 12) {
                     GradientIconBadge(systemImage: "graduationcap.fill", theme: viewModel.configuration.theme, size: 42)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Beginner install guide")
+                        Text("Beginner handoff guide")
                             .font(.headline)
-                        Text("Included in the export README so the package is easier to hand off.")
+                        Text("Included in README.md so the package is easier to hand to a learner, designer, or developer.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
@@ -193,7 +229,7 @@ struct BeginnerGuideCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .accessibilityLabel("Beginner install guide")
+        .accessibilityLabel("Beginner handoff guide")
     }
 }
 
@@ -211,11 +247,11 @@ struct FilePreviewRow: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(file.name)
                             .font(.headline)
-                        Text(fileTypeDescription)
+                        Text("\(fileTypeDescription) · \(lineCount) lines")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    Spacer()
+                    Spacer(minLength: 8)
                     Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle")
                         .font(.title3)
                         .foregroundStyle(isExpanded ? viewModel.configuration.theme.accent : .secondary)
@@ -225,7 +261,7 @@ struct FilePreviewRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("File \(file.name)")
+            .accessibilityLabel("File \(file.name), \(fileTypeDescription), \(lineCount) lines")
             .accessibilityHint(isExpanded ? "Collapse code preview" : "Expand code preview")
 
             if isExpanded {
@@ -239,6 +275,7 @@ struct FilePreviewRow: View {
                 .background(Color(.secondarySystemBackground).opacity(0.92), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .padding([.horizontal, .bottom], 12)
                 .transition(.opacity.combined(with: .move(edge: .top)))
+                .accessibilityLabel("Preview contents of \(file.name)")
             }
         }
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -246,6 +283,10 @@ struct FilePreviewRow: View {
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .strokeBorder(isExpanded ? viewModel.configuration.theme.accent.opacity(0.40) : Color.white.opacity(0.24), lineWidth: 1)
         )
+    }
+
+    private var lineCount: Int {
+        max(1, file.contents.split(separator: "\n", omittingEmptySubsequences: false).count)
     }
 
     private var icon: String {
