@@ -34,13 +34,13 @@ struct HomeView: View {
                         .font(.caption.weight(.black))
                         .tracking(0.8)
                         .foregroundStyle(viewModel.configuration.theme.accent)
-                    Text("Local UI generator")
+                    Text("AI UI generator")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("InterfaceForge, local UI generator")
+            .accessibilityLabel("InterfaceForge, AI UI generator")
 
             Text("Turn a plain idea into a polished interface package.")
                 .font(.system(size: 44, weight: .black, design: .rounded))
@@ -48,7 +48,7 @@ struct HomeView: View {
                 .minimumScaleFactor(0.72)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text("Describe a component, tune the style, test the interaction, then copy or share beginner-ready files. No accounts, API keys, or backend setup.")
+            Text("Describe a component, tune the style, test the interaction, then copy or share beginner-ready files. Bring your own OpenAI-compatible API key, or use clearly labeled fallback templates when AI is unavailable.")
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .lineSpacing(4)
@@ -67,7 +67,7 @@ struct HomeView: View {
             .accessibilityHint("Opens the prompt composer")
 
             FlowLayout(spacing: 8) {
-                MetricPill(title: "Local", detail: "No API keys", systemImage: "iphone", theme: viewModel.configuration.theme)
+                MetricPill(title: "AI", detail: "Bring your key", systemImage: "network", theme: viewModel.configuration.theme)
                 MetricPill(title: "Guided", detail: "5-step flow", systemImage: "list.bullet.rectangle", theme: viewModel.configuration.theme)
                 MetricPill(title: "Export", detail: "README included", systemImage: "shippingbox", theme: viewModel.configuration.theme)
             }
@@ -134,8 +134,8 @@ struct HomeView: View {
             )
 
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
-                ProofCard(icon: "lock.shield.fill", title: "Local by design", copy: "Templates run on-device with no account flow.")
-                ProofCard(icon: "wand.and.stars", title: "Guided creation", copy: "Prompt examples help users start fast.")
+                ProofCard(icon: "network", title: "Provider-ready", copy: "Use your own OpenAI-compatible chat endpoint.")
+                ProofCard(icon: "wand.and.stars", title: "Guided creation", copy: "Prompt examples and template hints help users start fast.")
                 ProofCard(icon: "doc.text.fill", title: "Beginner-ready", copy: "Exports include code, styles, and setup steps.")
                 ProofCard(icon: "hand.tap.fill", title: "Interactive", copy: "Preview taps, forms, swipes, and states before export.")
             }
@@ -155,7 +155,7 @@ struct HomeView: View {
     private func copy(for step: FlowStep) -> String {
         switch step {
         case .describe: return "Write one plain sentence or choose a template."
-        case .generate: return "Local templates assemble the matching component."
+        case .generate: return "The AI engine builds a prompt-specific spec, or a labeled fallback if unavailable."
         case .customize: return "Pick color, style, motion, and code format."
         case .preview: return "Tap, swipe, and test the live interaction."
         case .export: return "Copy or share files with install steps included."

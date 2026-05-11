@@ -16,13 +16,16 @@ struct ComposerView: View {
                 SectionHeader(
                     "Describe the component",
                     eyebrow: "Create",
-                    subtitle: "Start with a sentence or pick a template. Generation stays deterministic and local.",
+                    subtitle: "Start with a sentence or pick a template hint. AI generation uses your configured provider, with a labeled fallback when unavailable.",
                     systemImage: "text.bubble.fill",
                     theme: viewModel.configuration.theme
                 )
                 .padding(.horizontal)
 
                 promptCard
+                    .padding(.horizontal)
+
+                AIEngineSettingsCard()
                     .padding(.horizontal)
 
                 TemplatePicker()
@@ -127,7 +130,9 @@ struct ComposerView: View {
                     guard canGenerate else { return }
                     Task { await viewModel.generate() }
                 }
-                .accessibilityHint(canGenerate ? "Creates a local component from your prompt and selected style" : "Add a prompt or select a template first")
+                .accessibilityHint(canGenerate ? "Sends the prompt to the configured AI provider when an API key is available, otherwise creates a labeled fallback" : "Add a prompt or select a template first")
+
+                GenerationStatusView()
 
                 if viewModel.generatedDesign != nil {
                     Text("Generated. Continue to preview, or adjust customization and generate again.")
@@ -140,6 +145,81 @@ struct ComposerView: View {
     }
 }
 
+private struct AIEngineSettingsCard: View {
+    @EnvironmentObject private var viewModel: GeneratorViewModel
+
+    var body: some View {
+        GlassCard(radius: 30) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top, spacing: 12) {
+                    GradientIconBadge(systemImage: "network", theme: viewModel.configuration.theme, size: 42)
+                    SectionHeader(
+                        "AI engine",
+                        eyebrow: "Provider settings",
+                        subtitle: "Prompts are sent to the OpenAI-compatible endpoint below. If no valid key is available, InterfaceForge uses a labeled template fallback instead of presenting it as AI output.",
+                        theme: viewModel.configuration.theme
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("API key")
+                        .font(.caption.weight(.bold))
+                    SecureField("sk-...", text: $viewModel.aiAPIKey)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(13)
+                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .accessibilityLabel("AI provider API key")
+                    Text("Stored on this device with app storage for the MVP. Do not enter a shared or public key.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Endpoint")
+                        .font(.caption.weight(.bold))
+                    TextField("https://api.openai.com/v1/chat/completions", text: $viewModel.aiEndpoint)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.URL)
+                        .padding(13)
+                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .accessibilityLabel("AI chat completions endpoint")
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Model")
+                        .font(.caption.weight(.bold))
+                    TextField("gpt-4.1-mini", text: $viewModel.aiModel)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(13)
+                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .accessibilityLabel("AI model name")
+                }
+            }
+        }
+    }
+}
+
+private struct GenerationStatusView: View {
+    @EnvironmentObject private var viewModel: GeneratorViewModel
+
+    var body: some View {
+        if let error = viewModel.generationError {
+            Label(error, systemImage: "exclamationmark.triangle.fill")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.orange)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            Label(viewModel.generationStatus, systemImage: viewModel.aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "key.slash" : "checkmark.seal.fill")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
 struct TemplatePicker: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
 
@@ -147,7 +227,7 @@ struct TemplatePicker: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(
                 "Choose a starting point",
-                subtitle: "Optional. Pick one to skip prompt matching and generate from a known component pattern.",
+                subtitle: "Optional hint for the AI engine. The prompt still has priority, and fallback uses this when AI is unavailable.",
                 systemImage: "rectangle.stack.fill",
                 theme: viewModel.configuration.theme
             )
@@ -318,7 +398,7 @@ struct GenerationProgressView: View {
                         .scaleEffect(sparkle ? 1.08 : 0.94)
                         .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: sparkle)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Generating locally")
+                        Text("Generating with AI engine")
                             .font(.headline)
                         Text(viewModel.progressMessage)
                             .foregroundStyle(.secondary)
@@ -331,6 +411,6 @@ struct GenerationProgressView: View {
         }
         .onAppear { sparkle = true }
         .accessibilityLabel("Generation progress")
-        .accessibilityHint("Creates the component locally from built-in templates")
+        .accessibilityHint("Uses the configured AI provider when available and reports fallback status when unavailable")
     }
 }
