@@ -102,6 +102,93 @@ struct DesignConfiguration: Hashable {
     var outputType: OutputType = .react
 }
 
+enum GenerationMode: String, Hashable {
+    case ai = "AI-powered"
+    case fallback = "Template fallback"
+}
+
+struct GeneratedSection: Identifiable, Hashable, Codable {
+    var id = UUID()
+    var title: String
+    var detail: String
+    var iconName: String
+
+    init(title: String, detail: String, iconName: String = "sparkles") {
+        self.title = title
+        self.detail = detail
+        self.iconName = iconName
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
+        detail = try container.decodeIfPresent(String.self, forKey: .detail) ?? ""
+        iconName = try container.decodeIfPresent(String.self, forKey: .iconName) ?? "sparkles"
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case title
+        case detail
+        case iconName
+    }
+}
+
+struct GeneratedMetric: Identifiable, Hashable, Codable {
+    var id = UUID()
+    var value: String
+    var label: String
+    var trend: String
+
+    init(value: String, label: String, trend: String = "") {
+        self.value = value
+        self.label = label
+        self.trend = trend
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        value = try container.decodeIfPresent(String.self, forKey: .value) ?? ""
+        label = try container.decodeIfPresent(String.self, forKey: .label) ?? ""
+        trend = try container.decodeIfPresent(String.self, forKey: .trend) ?? ""
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case value
+        case label
+        case trend
+    }
+}
+
+struct GeneratedFormField: Identifiable, Hashable, Codable {
+    var id = UUID()
+    var label: String
+    var placeholder: String
+    var kind: String
+    var required: Bool
+
+    init(label: String, placeholder: String, kind: String = "text", required: Bool = true) {
+        self.label = label
+        self.placeholder = placeholder
+        self.kind = kind
+        self.required = required
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        label = try container.decodeIfPresent(String.self, forKey: .label) ?? ""
+        placeholder = try container.decodeIfPresent(String.self, forKey: .placeholder) ?? ""
+        kind = try container.decodeIfPresent(String.self, forKey: .kind) ?? "text"
+        required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? true
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case label
+        case placeholder
+        case kind
+        case required
+    }
+}
+
 struct GeneratedDesign: Identifiable, Hashable {
     let id = UUID()
     let template: DesignTemplate
@@ -110,4 +197,17 @@ struct GeneratedDesign: Identifiable, Hashable {
     let headline: String
     let subheadline: String
     let createdAt: Date
+    var kicker: String = "Generated with InterfaceForge"
+    var primaryAction: String = "Get started"
+    var secondaryAction: String = "See details"
+    var sections: [GeneratedSection] = []
+    var metrics: [GeneratedMetric] = []
+    var formFields: [GeneratedFormField] = []
+    var reactCode: String? = nil
+    var htmlCode: String? = nil
+    var cssCode: String? = nil
+    var swiftUICode: String? = nil
+    var generationMode: GenerationMode = .fallback
+    var generationStatus: String = "Template fallback generated on device."
+    var generationError: String? = nil
 }

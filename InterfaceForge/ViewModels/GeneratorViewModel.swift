@@ -12,7 +12,13 @@ final class GeneratorViewModel: ObservableObject {
     @Published var isGenerating = false
     @Published var progressMessage = "Reading your idea..."
     @Published var generationProgress = 0.0
+    @Published var generationError: String?
+    @Published var generationStatus = "Add an API key to enable AI-powered generation."
     @Published var selectedStep: FlowStep = .describe
+
+    @AppStorage("interfaceforge.ai.apiKey") var aiAPIKey: String = ""
+    @AppStorage("interfaceforge.ai.endpoint") var aiEndpoint: String = "https://api.openai.com/v1/chat/completions"
+    @AppStorage("interfaceforge.ai.model") var aiModel: String = "gpt-4.1-mini"
 
     let quickStartPrompts = [
         "SaaS pricing card",
@@ -23,11 +29,11 @@ final class GeneratorViewModel: ObservableObject {
     ]
 
     let progressMessages = [
-        "Reading your idea...",
-        "Choosing a beginner-friendly layout...",
-        "Mixing theme colors and motion...",
-        "Adding interactive states...",
-        "Packaging export-ready code..."
+        "Reading your idea and style settings...",
+        "Asking the configured AI engine for a structured UI spec...",
+        "Validating the returned JSON component data...",
+        "Building a responsive preview from the spec...",
+        "Assembling export-ready code files..."
     ]
 
     private let generator = DesignGenerator()
@@ -42,16 +48,28 @@ final class GeneratorViewModel: ObservableObject {
     func generate() async {
         isGenerating = true
         generationProgress = 0
+        generationError = nil
+        generationStatus = aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "AI unavailable until an API key is saved; a labeled fallback will be generated." : "Contacting the configured AI provider."
         selectedStep = .generate
 
         for index in progressMessages.indices {
             progressMessage = progressMessages[index]
-            generationProgress = Double(index + 1) / Double(progressMessages.count)
-            try? await Task.sleep(nanoseconds: 420_000_000)
+            generationProgress = Double(index + 1) / Double(progressMessages.count + 1)
+            try? await Task.sleep(nanoseconds: 320_000_000)
         }
 
-        let design = generator.generate(prompt: prompt, selectedTemplate: selectedTemplate, configuration: configuration)
+        let design = await generator.generate(
+            prompt: prompt,
+            selectedTemplate: selectedTemplate,
+            configuration: configuration,
+            apiKey: aiAPIKey,
+            endpoint: aiEndpoint,
+            model: aiModel
+        )
         generatedDesign = design
+        generationError = design.generationError
+        generationStatus = design.generationStatus
+        generationProgress = 1
         makeExportPackage(outputType: configuration.outputType)
         isGenerating = false
         selectedStep = .preview
@@ -71,6 +89,8 @@ final class GeneratorViewModel: ObservableObject {
         exportPackage = nil
         exportFolderURL = nil
         generationProgress = 0
+        generationError = nil
+        generationStatus = aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Add an API key to enable AI-powered generation." : "AI engine configured."
         progressMessage = progressMessages.first ?? "Reading your idea..."
     }
 }

@@ -45,9 +45,9 @@ struct PricingCardPreview: View {
                 .contentTransition(.numericText())
 
                 VStack(alignment: .leading, spacing: 12) {
-                    FeatureRow(text: "Responsive component code")
-                    FeatureRow(text: "Copy-paste install guide")
-                    FeatureRow(text: "No account or API key needed")
+                    ForEach(featureRows, id: \.self) { feature in
+                        FeatureRow(text: feature)
+                    }
                 }
 
                 Button {
@@ -55,7 +55,7 @@ struct PricingCardPreview: View {
                         selected.toggle()
                     }
                 } label: {
-                    Label(selected ? "Added to your export" : "Choose this design", systemImage: selected ? "checkmark.circle.fill" : "arrow.right.circle.fill")
+                    Label(selected ? "Added to your export" : design.primaryAction, systemImage: selected ? "checkmark.circle.fill" : "arrow.right.circle.fill")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 15)
@@ -66,6 +66,13 @@ struct PricingCardPreview: View {
                 .accessibilityLabel(selected ? "Design selected" : "Choose this design")
             }
         }
+    }
+
+    private var featureRows: [String] {
+        if !design.sections.isEmpty {
+            return design.sections.map(\.title)
+        }
+        return ["Responsive component code", "Copy-paste install guide", "AI engine or labeled fallback status"]
     }
 }
 
