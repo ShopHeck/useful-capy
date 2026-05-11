@@ -89,9 +89,9 @@ struct CodeExportService {
         export default function Component() {
           return (
             <section className="if-card \(className)" aria-labelledby="if-title">
-              <p className="if-kicker">\(design.kicker.htmlEscaped)</p>
-              <h2 id="if-title">\(design.headline.htmlEscaped)</h2>
-              <p className="if-subheadline">\(design.subheadline.htmlEscaped)</p>
+              <p className="if-kicker">{"\(design.kicker.jsEscaped)"}</p>
+              <h2 id="if-title">{"\(design.headline.jsEscaped)"}</h2>
+              <p className="if-subheadline">{"\(design.subheadline.jsEscaped)"}</p>
               {metrics.length > 0 && (
                 <div className="if-metrics" aria-label="Key stats">
                   {metrics.map((metric) => (
@@ -125,8 +125,8 @@ struct CodeExportService {
                 ))}
               </div>
               <div className="if-actions">
-                <button type="button">\(design.primaryAction.htmlEscaped)</button>
-                <a href="#details">\(design.secondaryAction.htmlEscaped)</a>
+                <button type="button">{"\(design.primaryAction.jsEscaped)"}</button>
+                <a href="#details">{"\(design.secondaryAction.jsEscaped)"}</a>
               </div>
             </section>
           );
