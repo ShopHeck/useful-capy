@@ -30,12 +30,15 @@ The MVP now includes an AI-powered generation path. Users provide their own Open
   - HTML + CSS
   - SwiftUI bonus output
 - Export screen with `Copy code`, `Share package`, visible file previews, and a plain-English beginner install guide.
+- App icon asset catalog support at `InterfaceForge/Assets.xcassets/AppIcon.appiconset`, ready for a final 1024×1024 PNG without transparency.
+- App Store deliverables folder at `AppStoreAssets/` for screenshot and icon production assets.
 
 ## Project structure
 
 ```text
 InterfaceForge.xcodeproj/        Xcode project metadata
 InterfaceForge/
+  Assets.xcassets/                 App icon asset catalog placeholder for production artwork
   App/                           SwiftUI app entry point
   Models/                        Template, style, generated design, and export package models
   Services/                      AI/fallback design generation and code export services
@@ -59,6 +62,7 @@ InterfaceForge/
 The project targets iOS 17 and uses SwiftUI/Foundation only. Xcode generates the app Info.plist and launch screen metadata from build settings.
 
 For App Store release prep, follow the tailored checklist in [`APP_STORE_SUBMISSION_CHECKLIST.md`](APP_STORE_SUBMISSION_CHECKLIST.md).
+Generated release screenshots and icon source deliverables belong in [`AppStoreAssets/`](AppStoreAssets/README.md).
 
 ## AI generation settings
 
@@ -101,3 +105,4 @@ The export UI also writes these files to a temporary package folder for sharing 
 - Exported code is intentionally compact and beginner-friendly rather than production-framework exhaustive.
 - Shared packages are folder-based temporary exports, not zipped archives in this initial MVP.
 - No backend sync, accounts, cloud storage, billing, or analytics are included.
+- The app icon catalog is configured, but final production bitmap artwork still needs to be added before submission.

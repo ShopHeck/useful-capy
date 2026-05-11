@@ -69,6 +69,10 @@ extension View {
     func appBackground(theme: ColorTheme) -> some View {
         modifier(AppBackground(theme: theme))
     }
+
+    func readableContentFrame(maxWidth: CGFloat = 980, alignment: Alignment = .center) -> some View {
+        frame(maxWidth: maxWidth, alignment: alignment)
+    }
 }
 
 struct StepRail: View {
@@ -142,6 +146,7 @@ struct PrimaryButton: View {
 }
 
 struct GlassCard<Content: View>: View {
+    @ScaledMetric(relativeTo: .body) private var cardPadding: CGFloat = 20
     let radius: CGFloat
     let content: Content
 
@@ -152,7 +157,7 @@ struct GlassCard<Content: View>: View {
 
     var body: some View {
         content
-            .padding(20)
+            .padding(cardPadding)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
@@ -162,6 +167,68 @@ struct GlassCard<Content: View>: View {
                     )
             )
             .shadow(color: .black.opacity(0.09), radius: 28, y: 14)
+    }
+}
+
+struct StatusBadge: View {
+    let title: String
+    let detail: String
+    let systemImage: String
+    let tint: Color
+
+    var body: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.caption.weight(.black))
+                Text(detail)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        } icon: {
+            Image(systemName: systemImage)
+                .font(.caption.weight(.black))
+                .foregroundStyle(tint)
+                .frame(width: 24, height: 24)
+                .background(tint.opacity(0.14), in: Circle())
+        }
+        .labelStyle(.titleAndIcon)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(.thinMaterial, in: Capsule())
+        .overlay(Capsule().stroke(tint.opacity(0.22), lineWidth: 1))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title), \(detail)")
+    }
+}
+
+struct InfoCallout: View {
+    let title: String
+    let message: String
+    let systemImage: String
+    let theme: ColorTheme
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: systemImage)
+                .font(.headline)
+                .foregroundStyle(theme.accent)
+                .frame(width: 32, height: 32)
+                .background(theme.accent.opacity(0.14), in: Circle())
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline.weight(.bold))
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(14)
+        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 }
 

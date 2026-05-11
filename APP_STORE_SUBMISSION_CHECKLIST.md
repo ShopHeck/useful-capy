@@ -15,9 +15,10 @@ Use this checklist to prepare, test, submit, and release the current AI-enabled 
 
 ## 2. App assets and metadata
 
-- [ ] Create a production app icon in all required iOS sizes through an Xcode app icon asset catalog.
+- [ ] Add final production artwork to `InterfaceForge/Assets.xcassets/AppIcon.appiconset`. The project is configured for `AppIcon`; use a 1024×1024 PNG without transparency and do not submit placeholder artwork.
+- [ ] Keep generated screenshots and source deliverables in `AppStoreAssets/`. Current required sizes to generate are iPhone 6.9-inch portrait 1320×2868, iPhone 6.5-inch portrait 1242×2688, and iPad Pro 13-inch portrait 2048×2732.
 - [ ] Keep the launch screen simple and consistent with the app name/brand. The project may use generated launch screen settings, so do not add an Info.plist unless the build requires it.
-- [ ] Capture App Store screenshots for required device sizes. Show the flow: Home, Describe/Generate, AI engine settings, Customize, Preview, and Export.
+- [ ] Capture App Store screenshots for required device sizes. Recommended sequence: Home, Create/AI Engine, AI Preview, and Export.
 - [ ] Use accurate screenshot copy, such as “bring your own API key,” “OpenAI-compatible provider,” “prompt-specific previews,” “fallback templates,” and “beginner-ready exports.”
 - [ ] Do not imply InterfaceForge supplies free AI credits, stores keys in a hosted backend, or guarantees production-complete code.
 - [ ] Optional: create an app preview video showing Describe → Configure AI → Generate → Customize → Preview → Export.
@@ -50,7 +51,7 @@ Use this checklist to prepare, test, submit, and release the current AI-enabled 
 
 ## 5. Functional QA before upload
 
-- [ ] Verify Home explains the AI workflow, user-provided provider, and fallback templates accurately.
+- [ ] Verify Home explains the AI workflow, user-provided provider, remote prompt request, and fallback templates accurately.
 - [ ] Verify empty prompt generation is disabled unless a template is selected.
 - [ ] Verify AI engine settings can store API key, endpoint, and model.
 - [ ] Verify a valid API key/model/endpoint can generate a prompt-specific design for an arbitrary prompt such as “a landing-page hero for a space tourism startup with waitlist signup and safety stats.”
@@ -61,7 +62,7 @@ Use this checklist to prepare, test, submit, and release the current AI-enabled 
 - [ ] Verify AI-provided code fields are preferred when present and derived exports are usable when code fields are absent.
 - [ ] Verify Copy uses the clipboard and includes all generated file contents.
 - [ ] Verify Share opens the share sheet when the temporary export folder exists.
-- [ ] Verify Dynamic Type, Dark Mode, and VoiceOver labels for core actions.
+- [ ] Verify Dynamic Type, Dark Mode, iPad max-width layouts, and VoiceOver labels for provider settings, generate, preview, export, and fallback status.
 - [ ] Verify there are no broken links, placeholder metadata, debug menus, or test-only strings.
 
 ## 6. Archive and upload

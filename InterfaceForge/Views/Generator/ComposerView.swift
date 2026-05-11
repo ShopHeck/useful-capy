@@ -14,9 +14,9 @@ struct ComposerView: View {
                     .padding(.horizontal, -16)
 
                 SectionHeader(
-                    "Describe the component",
-                    eyebrow: "Create",
-                    subtitle: "Start with a sentence or pick a template hint. AI generation uses your configured provider, with a labeled fallback when unavailable.",
+                    "Create an interface",
+                    eyebrow: "Guided AI setup",
+                    subtitle: "Describe the result you want, then connect your OpenAI-compatible provider when you are ready. Missing or failed AI calls produce a clearly labeled template fallback.",
                     systemImage: "text.bubble.fill",
                     theme: viewModel.configuration.theme
                 )
@@ -40,7 +40,7 @@ struct ComposerView: View {
                     NavigationLink(value: AppRoute.preview) {
                         SecondaryLinkRow(
                             title: "Open interactive preview",
-                            subtitle: "Test the generated component before exporting.",
+                            subtitle: "Review the generated component, AI or fallback status, and tap states before exporting.",
                             systemImage: "play.rectangle.fill",
                             theme: viewModel.configuration.theme
                         )
@@ -48,10 +48,12 @@ struct ComposerView: View {
                     .buttonStyle(.plain)
                     .padding(.horizontal)
                     .accessibilityLabel("Open interactive preview")
-                    .accessibilityHint("Shows the generated component with live interactions")
+                    .accessibilityHint("Shows the generated component with live interactions and generation status")
                 }
             }
+            .readableContentFrame(maxWidth: 980)
             .padding(.vertical, 18)
+            .frame(maxWidth: .infinity)
         }
         .navigationTitle("Create")
         .navigationBarTitleDisplayMode(.inline)
@@ -61,33 +63,34 @@ struct ComposerView: View {
 
     private var promptCard: some View {
         GlassCard(radius: 30) {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 18) {
                 HStack(alignment: .top, spacing: 12) {
                     GradientIconBadge(systemImage: "pencil.and.scribble", theme: viewModel.configuration.theme, size: 42)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("What should the UI do?")
+                        Text("Tell InterfaceForge what to make")
                             .font(.headline)
-                        Text("Mention the product, audience, or goal. Short prompts work well.")
+                        Text("Plain language is enough. Mention the audience, product, state, or conversion goal when it matters.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
                 ZStack(alignment: .topLeading) {
                     TextEditor(text: $viewModel.prompt)
-                        .frame(minHeight: 132)
+                        .frame(minHeight: 144)
                         .padding(12)
                         .scrollContentBackground(.hidden)
                         .background(Color(.secondarySystemBackground).opacity(0.86), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .stroke(viewModel.configuration.theme.accent.opacity(viewModel.prompt.isEmpty ? 0.14 : 0.34), lineWidth: 1)
+                                .stroke(viewModel.configuration.theme.accent.opacity(viewModel.prompt.isEmpty ? 0.16 : 0.40), lineWidth: 1)
                         )
-                        .accessibilityLabel("Describe your component")
-                        .accessibilityHint("Type a short description such as a friendly pricing card for a design course")
+                        .accessibilityLabel("Interface prompt")
+                        .accessibilityHint("Type a short description such as a waitlist hero for a space tourism startup with safety stats")
 
                     if viewModel.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        Text("Example: A friendly pricing card for my design course with a clear start button")
+                        Text("Example: A waitlist hero for a space tourism startup with signup form and safety stats")
                             .font(.body)
                             .foregroundStyle(.secondary)
                             .padding(.top, 20)
@@ -96,6 +99,13 @@ struct ComposerView: View {
                             .allowsHitTesting(false)
                     }
                 }
+
+                InfoCallout(
+                    title: "What gets sent",
+                    message: "When you generate with a key, the prompt, selected template hint, style choices, endpoint, and model are used for a remote provider request.",
+                    systemImage: "paperplane.fill",
+                    theme: viewModel.configuration.theme
+                )
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Quick starts")
@@ -125,19 +135,22 @@ struct ComposerView: View {
             GenerationProgressView()
                 .padding(.horizontal)
         } else {
-            VStack(alignment: .leading, spacing: 8) {
-                PrimaryButton(title: "Generate interface", systemImage: "wand.and.stars", theme: viewModel.configuration.theme, isEnabled: canGenerate) {
-                    guard canGenerate else { return }
-                    Task { await viewModel.generate() }
-                }
-                .accessibilityHint(canGenerate ? "Sends the prompt to the configured AI provider when an API key is available, otherwise creates a labeled fallback" : "Add a prompt or select a template first")
+            GlassCard(radius: 28) {
+                VStack(alignment: .leading, spacing: 12) {
+                    PrimaryButton(title: "Generate interface", systemImage: "wand.and.stars", theme: viewModel.configuration.theme, isEnabled: canGenerate) {
+                        guard canGenerate else { return }
+                        Task { await viewModel.generate() }
+                    }
+                    .accessibilityHint(canGenerate ? "Sends the prompt to the configured provider when an API key is available, otherwise creates a labeled template fallback" : "Add a prompt or select a template first")
 
-                GenerationStatusView()
+                    GenerationStatusView()
 
-                if viewModel.generatedDesign != nil {
-                    Text("Generated. Continue to preview, or adjust customization and generate again.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if viewModel.generatedDesign != nil {
+                        Text("Generated. Continue to preview, or adjust style choices and generate again.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
             .padding(.horizontal)
@@ -148,56 +161,115 @@ struct ComposerView: View {
 private struct AIEngineSettingsCard: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
 
+    private var hasKey: Bool {
+        !viewModel.aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         GlassCard(radius: 30) {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 18) {
                 HStack(alignment: .top, spacing: 12) {
-                    GradientIconBadge(systemImage: "network", theme: viewModel.configuration.theme, size: 42)
+                    GradientIconBadge(systemImage: "lock.shield.fill", theme: viewModel.configuration.theme, size: 42)
                     SectionHeader(
-                        "AI engine",
-                        eyebrow: "Provider settings",
-                        subtitle: "Prompts are sent to the OpenAI-compatible endpoint below. If no valid key is available, InterfaceForge uses a labeled template fallback instead of presenting it as AI output.",
+                        "AI provider connection",
+                        eyebrow: "Your key, your provider",
+                        subtitle: "InterfaceForge calls the OpenAI-compatible chat completions endpoint you configure. The MVP stores the key on this device with app storage.",
                         theme: viewModel.configuration.theme
                     )
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("API key")
-                        .font(.caption.weight(.bold))
-                    SecureField("sk-...", text: $viewModel.aiAPIKey)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .padding(13)
-                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .accessibilityLabel("AI provider API key")
-                    Text("Stored on this device with app storage for the MVP. Do not enter a shared or public key.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                FlowLayout(spacing: 8) {
+                    StatusBadge(title: hasKey ? "Key added" : "No key yet", detail: hasKey ? "Remote AI enabled" : "Fallback available", systemImage: hasKey ? "checkmark.seal.fill" : "key.slash.fill", tint: hasKey ? .green : .orange)
+                    StatusBadge(title: "Endpoint", detail: "Chat completions", systemImage: "network", tint: viewModel.configuration.theme.accent)
+                    StatusBadge(title: "Model", detail: viewModel.aiModel.isEmpty ? "Default allowed" : viewModel.aiModel, systemImage: "cpu.fill", tint: viewModel.configuration.theme.secondary)
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Endpoint")
-                        .font(.caption.weight(.bold))
-                    TextField("https://api.openai.com/v1/chat/completions", text: $viewModel.aiEndpoint)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .keyboardType(.URL)
-                        .padding(13)
-                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .accessibilityLabel("AI chat completions endpoint")
+                VStack(alignment: .leading, spacing: 14) {
+                    ProviderField(
+                        title: "API key",
+                        helper: "Use a private provider key. Do not enter a shared or public key.",
+                        systemImage: "key.fill",
+                        theme: viewModel.configuration.theme
+                    ) {
+                        SecureField("Paste provider key", text: $viewModel.aiAPIKey)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .accessibilityLabel("AI provider API key")
+                            .accessibilityHint("Stored on this device with app storage for the MVP")
+                    }
+
+                    ProviderField(
+                        title: "Chat completions endpoint",
+                        helper: "Default: https://api.openai.com/v1/chat/completions. Compatible providers may use a different URL.",
+                        systemImage: "link",
+                        theme: viewModel.configuration.theme
+                    ) {
+                        TextField("https://api.openai.com/v1/chat/completions", text: $viewModel.aiEndpoint)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .keyboardType(.URL)
+                            .accessibilityLabel("AI chat completions endpoint")
+                            .accessibilityHint("Prompts are sent to this remote endpoint during AI generation")
+                    }
+
+                    ProviderField(
+                        title: "Model",
+                        helper: "Use a model string supported by your provider, such as gpt-4.1-mini.",
+                        systemImage: "cpu",
+                        theme: viewModel.configuration.theme
+                    ) {
+                        TextField("gpt-4.1-mini", text: $viewModel.aiModel)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .accessibilityLabel("AI model name")
+                            .accessibilityHint("Model used by the configured provider request")
+                    }
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Model")
-                        .font(.caption.weight(.bold))
-                    TextField("gpt-4.1-mini", text: $viewModel.aiModel)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .padding(13)
-                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .accessibilityLabel("AI model name")
-                }
+                InfoCallout(
+                    title: "Fallback stays honest",
+                    message: "If the key is missing, the endpoint fails, or the provider returns unusable JSON, the preview and export are labeled as template fallback starter code.",
+                    systemImage: "tag.fill",
+                    theme: viewModel.configuration.theme
+                )
             }
+        }
+    }
+}
+
+private struct ProviderField<Content: View>: View {
+    let title: String
+    let helper: String
+    let systemImage: String
+    let theme: ColorTheme
+    let content: Content
+
+    init(title: String, helper: String, systemImage: String, theme: ColorTheme, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.helper = helper
+        self.systemImage = systemImage
+        self.theme = theme
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(title, systemImage: systemImage)
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.primary)
+            content
+                .font(.body)
+                .padding(14)
+                .frame(minHeight: 48)
+                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(theme.accent.opacity(0.16), lineWidth: 1)
+                )
+            Text(helper)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -211,11 +283,13 @@ private struct GenerationStatusView: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.orange)
                 .fixedSize(horizontal: false, vertical: true)
+                .accessibilityLabel("Generation fallback status. \(error)")
         } else {
             Label(viewModel.generationStatus, systemImage: viewModel.aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "key.slash" : "checkmark.seal.fill")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+                .accessibilityLabel("Generation status. \(viewModel.generationStatus)")
         }
     }
 }
@@ -224,25 +298,28 @@ struct TemplatePicker: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(
-                "Choose a starting point",
-                subtitle: "Optional hint for the AI engine. The prompt still has priority, and fallback uses this when AI is unavailable.",
-                systemImage: "rectangle.stack.fill",
-                theme: viewModel.configuration.theme
-            )
+        GlassCard(radius: 30) {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeader(
+                    "Choose a starting point",
+                    subtitle: "Optional. A template helps set structure, but your prompt still has priority when remote AI generation succeeds.",
+                    systemImage: "rectangle.stack.fill",
+                    theme: viewModel.configuration.theme
+                )
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(DesignTemplate.all) { template in
-                        TemplateCard(template: template, isSelected: viewModel.selectedTemplate?.id == template.id) {
-                            withAnimation(.spring(response: 0.32, dampingFraction: 0.84)) {
-                                viewModel.selectedTemplate = template
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(DesignTemplate.all) { template in
+                            TemplateCard(template: template, isSelected: viewModel.selectedTemplate?.id == template.id) {
+                                withAnimation(.spring(response: 0.32, dampingFraction: 0.84)) {
+                                    viewModel.selectedTemplate = template
+                                }
                             }
                         }
                     }
+                    .padding(.vertical, 2)
                 }
-                .padding(.vertical, 2)
+                .accessibilityLabel("Template choices")
             }
         }
     }
@@ -273,19 +350,19 @@ private struct TemplateCard: View {
                         .font(.headline)
                     Text(template.shortDescription)
                         .font(.caption)
-                        .foregroundStyle(isSelected ? .white.opacity(0.84) : .secondary)
-                        .lineLimit(3)
+                        .foregroundStyle(isSelected ? .white.opacity(0.86) : .secondary)
+                        .lineLimit(4)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Text(isSelected ? "Selected template" : "Tap to select")
+                Text(isSelected ? "Selected template" : "Use as hint")
                     .font(.caption.weight(.bold))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 7)
                     .foregroundStyle(isSelected ? viewModel.configuration.theme.accent : .secondary)
                     .background(isSelected ? AnyShapeStyle(Color.white) : AnyShapeStyle(.thinMaterial), in: Capsule())
             }
-            .frame(width: 190, minHeight: 176, alignment: .topLeading)
+            .frame(width: 210, minHeight: 184, alignment: .topLeading)
             .padding(16)
             .foregroundStyle(isSelected ? .white : .primary)
             .background(cardBackground, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
@@ -297,7 +374,7 @@ private struct TemplateCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Template \(template.title)")
-        .accessibilityHint(isSelected ? "Selected template" : "Selects this template for generation")
+        .accessibilityHint(isSelected ? "Selected as a structure hint" : "Selects this template as an optional generation hint")
     }
 
     private var cardBackground: some ShapeStyle {
@@ -314,9 +391,9 @@ struct StyleControlsView: View {
                 HStack(alignment: .top, spacing: 12) {
                     GradientIconBadge(systemImage: "slider.horizontal.3", theme: viewModel.configuration.theme, size: 42)
                     SectionHeader(
-                        "Customize",
+                        "Customize output",
                         eyebrow: "Live style",
-                        subtitle: "Changes refresh the preview and export package when a component exists.",
+                        subtitle: "These choices shape the preview and the next export package.",
                         theme: viewModel.configuration.theme
                     )
                     Spacer(minLength: 0)
@@ -388,6 +465,7 @@ private struct ControlChipGroup<Value: Hashable & Identifiable>: View {
 
 struct GenerationProgressView: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var sparkle = false
 
     var body: some View {
@@ -395,10 +473,10 @@ struct GenerationProgressView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 12) {
                     GradientIconBadge(systemImage: "sparkles", theme: viewModel.configuration.theme, size: 44)
-                        .scaleEffect(sparkle ? 1.08 : 0.94)
-                        .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: sparkle)
+                        .scaleEffect(sparkle && !reduceMotion ? 1.08 : 0.96)
+                        .animation(reduceMotion ? nil : .easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: sparkle)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Generating with AI engine")
+                        Text("Generating with configured provider")
                             .font(.headline)
                         Text(viewModel.progressMessage)
                             .foregroundStyle(.secondary)

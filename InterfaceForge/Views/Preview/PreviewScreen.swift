@@ -12,7 +12,7 @@ struct PreviewScreen: View {
                 SectionHeader(
                     "Interactive preview",
                     eyebrow: "Test before export",
-                    subtitle: "Try the live component, then adjust style controls to refresh the package.",
+                    subtitle: "Confirm the generated content, AI or fallback status, responsive sections, and tap states before sharing starter files.",
                     systemImage: "play.rectangle.fill",
                     theme: viewModel.configuration.theme
                 )
@@ -26,68 +26,56 @@ struct PreviewScreen: View {
                         .padding(.horizontal)
                         .transition(.scale.combined(with: .opacity))
 
-                    GlassCard(radius: 30) {
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack(alignment: .top, spacing: 12) {
-                                GradientIconBadge(systemImage: "arrow.triangle.2.circlepath", theme: viewModel.configuration.theme, size: 42)
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Customize while you preview")
-                                        .font(.headline)
-                                    Text("Every control below updates this preview and rebuilds the export package so the copied code matches what you see.")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                            }
-
-                            StyleControlsView()
-                                .onChange(of: viewModel.configuration) { _, newValue in
-                                    var refreshed = GeneratedDesign(
-                                        template: design.template,
-                                        prompt: design.prompt,
-                                        configuration: newValue,
-                                        headline: design.headline,
-                                        subheadline: design.subheadline,
-                                        createdAt: design.createdAt,
-                                        kicker: design.kicker,
-                                        primaryAction: design.primaryAction,
-                                        secondaryAction: design.secondaryAction,
-                                        sections: design.sections,
-                                        metrics: design.metrics,
-                                        formFields: design.formFields,
-                                        reactCode: design.reactCode,
-                                        htmlCode: design.htmlCode,
-                                        cssCode: design.cssCode,
-                                        swiftUICode: design.swiftUICode,
-                                        generationMode: design.generationMode,
-                                        generationStatus: design.generationStatus,
-                                        generationError: design.generationError
-                                    )
-                                    refreshed.generationStatus = design.generationStatus
-                                    viewModel.generatedDesign = refreshed
-                                    viewModel.makeExportPackage(outputType: newValue.outputType)
-                                }
+                    StyleControlsView()
+                        .padding(.horizontal)
+                        .onChange(of: viewModel.configuration) { _, newValue in
+                            var refreshed = GeneratedDesign(
+                                template: design.template,
+                                prompt: design.prompt,
+                                configuration: newValue,
+                                headline: design.headline,
+                                subheadline: design.subheadline,
+                                createdAt: design.createdAt,
+                                kicker: design.kicker,
+                                primaryAction: design.primaryAction,
+                                secondaryAction: design.secondaryAction,
+                                sections: design.sections,
+                                metrics: design.metrics,
+                                formFields: design.formFields,
+                                reactCode: design.reactCode,
+                                htmlCode: design.htmlCode,
+                                cssCode: design.cssCode,
+                                swiftUICode: design.swiftUICode,
+                                generationMode: design.generationMode,
+                                generationStatus: design.generationStatus,
+                                generationError: design.generationError
+                            )
+                            refreshed.generationStatus = design.generationStatus
+                            viewModel.generatedDesign = refreshed
+                            viewModel.makeExportPackage(outputType: newValue.outputType)
                         }
-                    }
-                    .padding(.horizontal)
 
                     NavigationLink(value: AppRoute.export) {
-                        Label("Export code package", systemImage: "shippingbox.fill")
+                        Label("Export starter package", systemImage: "shippingbox.fill")
                             .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
+                            .frame(maxWidth: 480)
+                            .frame(minHeight: 54)
                             .foregroundStyle(.white)
                             .background(viewModel.configuration.theme.gradient, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
                             .shadow(color: viewModel.configuration.theme.accent.opacity(0.28), radius: 22, y: 12)
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(.horizontal)
-                    .accessibilityLabel("Export code package")
+                    .accessibilityLabel("Export starter package")
                     .accessibilityHint("Opens copy and share options for the generated files")
                 } else {
                     ContentUnavailableView("No preview yet", systemImage: "wand.and.stars", description: Text("Generate an interface first, then come back here to test it."))
+                        .padding(.horizontal)
                 }
             }
+            .readableContentFrame(maxWidth: 1080)
             .padding(.vertical, 18)
+            .frame(maxWidth: .infinity)
         }
         .navigationTitle("Preview")
         .navigationBarTitleDisplayMode(.inline)
@@ -102,16 +90,17 @@ private struct PreviewSummaryCard: View {
 
     var body: some View {
         GlassCard(radius: 30) {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .top, spacing: 14) {
                     GradientIconBadge(systemImage: design.template.iconName, theme: viewModel.configuration.theme, size: 48)
-                    VStack(alignment: .leading, spacing: 5) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(design.headline)
                             .font(.title3.weight(.black))
                             .fixedSize(horizontal: false, vertical: true)
-                        Text("\(design.template.title) · \(design.generationMode.rawValue)")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(viewModel.configuration.theme.accent)
+                        FlowLayout(spacing: 8) {
+                            GenerationModeBadge(design: design, theme: viewModel.configuration.theme)
+                            MetricPill(title: design.template.title, detail: "Component", systemImage: "rectangle.stack", theme: viewModel.configuration.theme)
+                        }
                         Text(design.subheadline)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
@@ -120,15 +109,11 @@ private struct PreviewSummaryCard: View {
                 }
 
                 if let error = design.generationError {
-                    Label(error, systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.orange)
-                        .fixedSize(horizontal: false, vertical: true)
+                    InfoCallout(title: "Template fallback active", message: error, systemImage: "exclamationmark.triangle.fill", theme: viewModel.configuration.theme)
+                        .accessibilityLabel("Fallback status. \(error)")
                 } else {
-                    Label(design.generationStatus, systemImage: "checkmark.seal.fill")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    InfoCallout(title: "AI output active", message: design.generationStatus, systemImage: "checkmark.seal.fill", theme: viewModel.configuration.theme)
+                        .accessibilityLabel("AI output status. \(design.generationStatus)")
                 }
 
                 FlowLayout(spacing: 8) {
@@ -139,7 +124,22 @@ private struct PreviewSummaryCard: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Preview summary for \(design.template.title), \(design.configuration.theme.rawValue) theme, \(design.configuration.outputType.rawValue) export")
+        .accessibilityLabel("Preview summary for \(design.template.title), \(design.generationMode.rawValue), \(design.configuration.outputType.rawValue) export")
+    }
+}
+
+private struct GenerationModeBadge: View {
+    let design: GeneratedDesign
+    let theme: ColorTheme
+
+    var body: some View {
+        let tint: Color = design.generationMode == .ai ? theme.accent : .orange
+        StatusBadge(
+            title: design.generationMode.rawValue,
+            detail: design.generationMode == .ai ? "Provider generated" : "Clearly labeled",
+            systemImage: design.generationMode == .ai ? "sparkles" : "tag.fill",
+            tint: tint
+        )
     }
 }
 
@@ -169,117 +169,161 @@ private struct AdaptiveAIPreview: View {
     var body: some View {
         GlassCard(radius: design.configuration.visualStyle.cornerRadius) {
             VStack(alignment: .leading, spacing: 20) {
-                ZStack(alignment: .bottomLeading) {
-                    RoundedRectangle(cornerRadius: 30, style: .continuous)
-                        .fill(design.configuration.theme.darkGradient)
-                        .frame(minHeight: 180)
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(design.kicker)
-                            .font(.caption.weight(.black))
-                            .tracking(0.8)
-                            .textCase(.uppercase)
-                            .foregroundStyle(.white.opacity(0.78))
-                        Text(design.headline)
-                            .font(.system(size: 38, weight: .black, design: .rounded))
-                            .foregroundStyle(.white)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text(design.subheadline)
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.82))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(22)
-                }
-
-                if !design.metrics.isEmpty {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 10)], spacing: 10) {
-                        ForEach(design.metrics) { metric in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(metric.value)
-                                    .font(.title2.weight(.black))
-                                Text(metric.label)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                if !metric.trend.isEmpty {
-                                    Text(metric.trend)
-                                        .font(.caption2.weight(.bold))
-                                        .foregroundStyle(.green)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(14)
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .top, spacing: 18) {
+                        heroPanel
+                            .frame(maxWidth: 520)
+                        VStack(alignment: .leading, spacing: 14) {
+                            modeStrip
+                            metricsBlock
                         }
+                        .frame(maxWidth: 360, alignment: .topLeading)
+                    }
+
+                    VStack(alignment: .leading, spacing: 16) {
+                        heroPanel
+                        modeStrip
+                        metricsBlock
                     }
                 }
 
                 if !design.formFields.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(design.formFields) { field in
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(field.label)
-                                    .font(.caption.weight(.bold))
-                                if field.kind == "textarea" {
-                                    TextField(field.placeholder, text: .constant(""), axis: .vertical)
-                                        .lineLimit(3, reservesSpace: true)
-                                        .padding(14)
-                                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                                } else {
-                                    TextField(field.placeholder, text: .constant(""))
-                                        .textInputAutocapitalization(.never)
-                                        .keyboardType(field.kind == "email" ? .emailAddress : .default)
-                                        .padding(14)
-                                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                                }
-                            }
-                        }
-                    }
-                    .accessibilityElement(children: .contain)
+                    formBlock
                 }
 
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(previewSections) { section in
-                        HStack(alignment: .top, spacing: 12) {
-                            Image(systemName: section.iconName.isEmpty ? "sparkles" : section.iconName)
-                                .frame(width: 30, height: 30)
-                                .foregroundStyle(.white)
-                                .background(design.configuration.theme.gradient, in: Circle())
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(section.title)
-                                    .font(.headline)
-                                Text(section.detail)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                        .padding(12)
-                        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    }
+                sectionsBlock
+                actionRow
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Adaptive preview for \(design.headline). \(design.generationMode.rawValue).")
+    }
+
+    private var heroPanel: some View {
+        ZStack(alignment: .bottomLeading) {
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .fill(design.configuration.theme.darkGradient)
+                .frame(minHeight: 210)
+                .overlay(alignment: .topTrailing) {
+                    Image(systemName: design.generationMode == .ai ? "sparkles" : "tag.fill")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.72))
+                        .padding(20)
+                        .accessibilityHidden(true)
                 }
+            VStack(alignment: .leading, spacing: 10) {
+                Text(design.kicker)
+                    .font(.caption.weight(.black))
+                    .tracking(0.8)
+                    .textCase(.uppercase)
+                    .foregroundStyle(.white.opacity(0.80))
+                Text(design.headline)
+                    .font(.system(.largeTitle, design: .rounded, weight: .black))
+                    .foregroundStyle(.white)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(design.subheadline)
+                    .font(.body)
+                    .foregroundStyle(.white.opacity(0.84))
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(24)
+        }
+    }
 
-                HStack(spacing: 12) {
-                    Button {
-                        withAnimation(design.configuration.motionLevel.spring) {
-                            submitted.toggle()
-                        }
-                    } label: {
-                        Label(submitted ? "Ready" : design.primaryAction, systemImage: submitted ? "checkmark.circle.fill" : "arrow.right.circle.fill")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .foregroundStyle(.white)
-                            .background(design.configuration.theme.gradient, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    }
-                    .buttonStyle(.plain)
+    private var modeStrip: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Preview source")
+                .font(.caption.weight(.black))
+                .foregroundStyle(design.configuration.theme.accent)
+                .textCase(.uppercase)
+            Text(design.generationMode == .ai ? "Prompt-specific AI output" : "Template fallback output")
+                .font(.headline)
+            Text(design.generationMode == .ai ? "Generated from the structured provider response and ready for starter-code export." : "Built from local fallback templates because AI generation was unavailable.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
 
-                    Button(design.secondaryAction) { }
-                        .font(.headline)
-                        .buttonStyle(.bordered)
-                        .tint(design.configuration.theme.accent)
+    @ViewBuilder
+    private var metricsBlock: some View {
+        if !design.metrics.isEmpty {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 116), spacing: 10)], spacing: 10) {
+                ForEach(design.metrics) { metric in
+                    MetricTile(metric: metric, theme: design.configuration.theme)
                 }
             }
         }
+    }
+
+    private var formBlock: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Generated form fields")
+                .font(.headline)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 240), spacing: 12)], spacing: 12) {
+                ForEach(design.formFields) { field in
+                    GeneratedFieldView(field: field)
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private var sectionsBlock: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Generated structure")
+                .font(.headline)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 240), spacing: 12)], spacing: 12) {
+                ForEach(previewSections) { section in
+                    PreviewSectionTile(section: section, theme: design.configuration.theme)
+                }
+            }
+        }
+    }
+
+    private var actionRow: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                primaryActionButton
+                secondaryActionButton
+            }
+            VStack(spacing: 12) {
+                primaryActionButton
+                secondaryActionButton
+            }
+        }
+    }
+
+    private var primaryActionButton: some View {
+        Button {
+            withAnimation(design.configuration.motionLevel.spring) {
+                submitted.toggle()
+            }
+        } label: {
+            Label(submitted ? "Ready" : design.primaryAction, systemImage: submitted ? "checkmark.circle.fill" : "arrow.right.circle.fill")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 50)
+                .foregroundStyle(.white)
+                .background(design.configuration.theme.gradient, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(submitted ? "Primary preview action complete" : "Primary preview action, \(design.primaryAction)")
+        .accessibilityHint("Toggles the preview action state")
+    }
+
+    private var secondaryActionButton: some View {
+        Button(design.secondaryAction) { }
+            .font(.headline)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: 50)
+            .buttonStyle(.bordered)
+            .tint(design.configuration.theme.accent)
+            .accessibilityLabel("Secondary preview action, \(design.secondaryAction)")
     }
 
     private var previewSections: [GeneratedSection] {
@@ -289,5 +333,88 @@ private struct AdaptiveAIPreview: View {
             GeneratedSection(title: "Export ready", detail: "The same structured fields feed React, HTML, CSS, and SwiftUI exports."),
             GeneratedSection(title: "Accessible by default", detail: "The preview favors clear labels, readable spacing, and large touch targets.")
         ]
+    }
+}
+
+private struct MetricTile: View {
+    let metric: GeneratedMetric
+    let theme: ColorTheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(metric.value)
+                .font(.title2.weight(.black))
+                .minimumScaleFactor(0.8)
+            Text(metric.label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if !metric.trend.isEmpty {
+                Text(metric.trend)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.green)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(theme.accent.opacity(0.14), lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Metric \(metric.label), \(metric.value) \(metric.trend)")
+    }
+}
+
+private struct GeneratedFieldView: View {
+    let field: GeneratedFormField
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(field.required ? "\(field.label) required" : field.label)
+                .font(.caption.weight(.bold))
+            if field.kind == "textarea" {
+                TextField(field.placeholder, text: .constant(""), axis: .vertical)
+                    .lineLimit(3, reservesSpace: true)
+                    .padding(14)
+                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .accessibilityLabel(field.label)
+            } else {
+                TextField(field.placeholder, text: .constant(""))
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(field.kind == "email" ? .emailAddress : .default)
+                    .padding(14)
+                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .accessibilityLabel(field.label)
+            }
+        }
+    }
+}
+
+private struct PreviewSectionTile: View {
+    let section: GeneratedSection
+    let theme: ColorTheme
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: section.iconName.isEmpty ? "sparkles" : section.iconName)
+                .font(.subheadline.weight(.bold))
+                .frame(width: 34, height: 34)
+                .foregroundStyle(.white)
+                .background(theme.gradient, in: Circle())
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(section.title)
+                    .font(.headline)
+                Text(section.detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 }
