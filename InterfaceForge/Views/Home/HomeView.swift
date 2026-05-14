@@ -15,6 +15,9 @@ struct HomeView: View {
                 flowSection
                     .padding(.horizontal)
 
+                librarySection
+                    .padding(.horizontal)
+
                 proofSection
                     .padding(.horizontal)
             }
@@ -110,6 +113,34 @@ struct HomeView: View {
                     }
                 }
             }
+        }
+    }
+
+    private var librarySection: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 240), spacing: 14)], spacing: 14) {
+            NavigationLink(value: AppRoute.history) {
+                SecondaryLinkRow(
+                    title: "Design history",
+                    subtitle: "Revisit past generations — every design auto-saves for preview and export.",
+                    systemImage: "clock.arrow.circlepath",
+                    theme: viewModel.configuration.theme
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Design history")
+            .accessibilityHint("Browse and reload past generated designs")
+
+            NavigationLink(value: AppRoute.promptLibrary) {
+                SecondaryLinkRow(
+                    title: "Prompt library",
+                    subtitle: "Save reusable prompts so you don't retype your favorites.",
+                    systemImage: "bookmark.fill",
+                    theme: viewModel.configuration.theme
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Prompt library")
+            .accessibilityHint("Browse, save, and load saved prompts")
         }
     }
 

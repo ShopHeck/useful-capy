@@ -45,7 +45,7 @@ final class GeneratorViewModel: ObservableObject {
         selectedStep = .describe
     }
 
-    func generate() async {
+    func generate(historyStore: DesignHistoryStore? = nil) async {
         isGenerating = true
         generationProgress = 0
         generationError = nil
@@ -73,6 +73,8 @@ final class GeneratorViewModel: ObservableObject {
         makeExportPackage(outputType: configuration.outputType)
         isGenerating = false
         selectedStep = .preview
+
+        historyStore?.save(design)
     }
 
     func makeExportPackage(outputType: OutputType) {

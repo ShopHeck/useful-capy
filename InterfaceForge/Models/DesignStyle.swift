@@ -95,7 +95,7 @@ enum OutputType: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-struct DesignConfiguration: Hashable {
+struct DesignConfiguration: Hashable, Codable {
     var theme: ColorTheme = .aurora
     var visualStyle: VisualStyle = .glass
     var motionLevel: MotionLevel = .lively
@@ -189,8 +189,8 @@ struct GeneratedFormField: Identifiable, Hashable, Codable {
     }
 }
 
-struct GeneratedDesign: Identifiable, Hashable {
-    let id = UUID()
+struct GeneratedDesign: Identifiable, Hashable, Codable {
+    var id = UUID()
     let template: DesignTemplate
     let prompt: String
     let configuration: DesignConfiguration
