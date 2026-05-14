@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ComposerView: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
+    @EnvironmentObject private var historyStore: DesignHistoryStore
+    @EnvironmentObject private var promptStore: PromptLibraryStore
 
     private var canGenerate: Bool {
         !viewModel.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.selectedTemplate != nil
@@ -119,6 +121,23 @@ struct ComposerView: View {
                     }
                 }
 
+                if !viewModel.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Button {
+                        let name = viewModel.prompt
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                            .components(separatedBy: " ")
+                            .prefix(6)
+                            .joined(separator: " ")
+                        promptStore.save(SavedPrompt(name: name, text: viewModel.prompt.trimmingCharacters(in: .whitespacesAndNewlines)))
+                    } label: {
+                        Label("Save to prompt library", systemImage: "bookmark")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(viewModel.configuration.theme.accent)
+                    .accessibilityLabel("Save this prompt to your library")
+                }
+
                 if !canGenerate {
                     Label("Add a prompt or select a template to enable generation.", systemImage: "info.circle")
                         .font(.caption.weight(.semibold))
@@ -139,7 +158,7 @@ struct ComposerView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     PrimaryButton(title: "Generate interface", systemImage: "wand.and.stars", theme: viewModel.configuration.theme, isEnabled: canGenerate) {
                         guard canGenerate else { return }
-                        Task { await viewModel.generate() }
+                        Task { await viewModel.generate(historyStore: historyStore) }
                     }
                     .accessibilityHint(canGenerate ? "Sends the prompt to the configured provider when an API key is available, otherwise creates a labeled template fallback" : "Add a prompt or select a template first")
 

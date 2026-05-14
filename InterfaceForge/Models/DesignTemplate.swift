@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct DesignTemplate: Identifiable, Hashable {
+struct DesignTemplate: Identifiable, Hashable, Codable {
     let id: String
     let title: String
     let shortDescription: String

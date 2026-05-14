@@ -14,6 +14,10 @@ struct RootView: View {
                         PreviewScreen()
                     case .export:
                         ExportScreen()
+                    case .history:
+                        DesignHistoryScreen()
+                    case .promptLibrary:
+                        PromptLibraryScreen()
                     }
                 }
         }
@@ -25,4 +29,6 @@ enum AppRoute: Hashable {
     case composer
     case preview
     case export
+    case history
+    case promptLibrary
 }
