@@ -103,6 +103,7 @@ struct CodeExportService {
         </body>
         </html>
         """
+    }
 
     private func swiftUIPackage(for design: GeneratedDesign) -> ExportPackage {
         let files = [
