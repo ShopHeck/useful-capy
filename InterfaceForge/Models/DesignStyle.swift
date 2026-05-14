@@ -90,6 +90,7 @@ enum MotionLevel: String, CaseIterable, Identifiable {
 enum OutputType: String, CaseIterable, Identifiable {
     case react = "React + CSS"
     case html = "HTML + CSS"
+    case tailwind = "Tailwind CSS"
     case swiftUI = "SwiftUI"
 
     var id: String { rawValue }

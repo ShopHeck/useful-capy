@@ -7,6 +7,8 @@ struct CodeExportService {
             return reactPackage(for: design)
         case .html:
             return htmlPackage(for: design)
+        case .tailwind:
+            return tailwindPackage(for: design)
         case .swiftUI:
             return swiftUIPackage(for: design)
         }
@@ -44,6 +46,63 @@ struct CodeExportService {
             ExportFile(name: "README.md", contents: readme(for: design, outputType: .html))
         ]
         return ExportPackage(packageName: packageName(for: design, suffix: "HTML"), outputType: .html, files: files, beginnerGuide: guide(for: .html))
+    }
+
+    private func tailwindPackage(for design: GeneratedDesign) -> ExportPackage {
+        let files = [
+            ExportFile(name: "index.html", contents: tailwindHTML(for: design)),
+            ExportFile(name: "README.md", contents: readme(for: design, outputType: .tailwind))
+        ]
+        return ExportPackage(packageName: packageName(for: design, suffix: "Tailwind"), outputType: .tailwind, files: files, beginnerGuide: guide(for: .tailwind))
+    }
+
+    private func tailwindHTML(for design: GeneratedDesign) -> String {
+        let sections = normalizedSections(for: design)
+        let metrics = design.metrics
+        let fields = normalizedFields(for: design)
+        let metricHTML = metrics.isEmpty ? "" : """
+              <div class="grid grid-cols-2 md:grid-cols-\(min(metrics.count, 4)) gap-3 mb-6" aria-label="Key stats">
+        \(metrics.map { "        <div class=\"bg-white/70 rounded-2xl p-4 border border-slate-200/60\"><strong class=\"block text-2xl tracking-tight\">\($0.value.htmlEscaped)</strong><span class=\"block text-slate-500 text-sm\">\($0.label.htmlEscaped)</span>\($0.trend.isEmpty ? "" : "<small class=\"block text-emerald-600 font-bold text-xs mt-1\">\($0.trend.htmlEscaped)</small>")</div>" }.joined(separator: "\n"))
+              </div>
+        """
+        let fieldHTML = fields.isEmpty ? "" : """
+              <form class="grid gap-3 mb-6">
+        \(fields.map { field in
+            let required = field.required ? " required" : ""
+            if field.kind == "textarea" {
+                return "        <label class=\"font-semibold text-sm\">\(field.label.htmlEscaped)<textarea placeholder=\"\(field.placeholder.attributeEscaped)\" class=\"w-full border border-slate-300 rounded-xl p-3 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500/40\" rows=\"3\"\(required)></textarea></label>"
+            }
+            return "        <label class=\"font-semibold text-sm\">\(field.label.htmlEscaped)<input type=\"\(field.kind.attributeEscaped)\" placeholder=\"\(field.placeholder.attributeEscaped)\" class=\"w-full border border-slate-300 rounded-xl p-3 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500/40\"\(required) /></label>"
+        }.joined(separator: "\n"))
+              </form>
+        """
+        return """
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>\(design.headline.htmlEscaped)</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+        </head>
+        <body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen grid place-items-center p-6">
+          <main class="w-full max-w-2xl bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/60 border border-white/70 p-8 md:p-10">
+            <p class="text-xs font-extrabold uppercase tracking-widest text-blue-600 mb-3">\(design.kicker.htmlEscaped)</p>
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight text-slate-900 mb-3">\(design.headline.htmlEscaped)</h1>
+            <p class="text-lg text-slate-500 mb-6 max-w-prose">\(design.subheadline.htmlEscaped)</p>
+        \(metricHTML)
+        \(fieldHTML)
+            <div class="grid gap-3 mb-6">
+        \(sections.map { "      <article class=\"flex gap-3 p-4 bg-slate-50/80 rounded-2xl\"><span class=\"flex-shrink-0 w-8 h-8 grid place-items-center bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-full text-sm font-bold\">✦</span><div><h2 class=\"font-bold text-slate-800\">\($0.title.htmlEscaped)</h2><p class=\"text-slate-500 text-sm\">\($0.detail.htmlEscaped)</p></div></article>" }.joined(separator: "\n"))
+            </div>
+            <div class="flex flex-wrap gap-3">
+              <button type="button" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold px-6 py-3 rounded-full shadow-lg shadow-blue-500/30 hover:shadow-xl transition">\(design.primaryAction.htmlEscaped)</button>
+              <a href="#details" class="bg-slate-100 text-slate-700 font-semibold px-6 py-3 rounded-full hover:bg-slate-200 transition">\(design.secondaryAction.htmlEscaped)</a>
+            </div>
+          </main>
+        </body>
+        </html>
+        """
     }
 
     private func swiftUIPackage(for design: GeneratedDesign) -> ExportPackage {
@@ -345,6 +404,17 @@ struct CodeExportService {
             3. Upload both files to your website host.
             4. To place it inside an existing page, copy the `<section>` from `index.html` and the CSS from `styles.css`.
             """
+        case .tailwind:
+            return """
+            # InterfaceForge Tailwind CSS package
+
+            This package contains one \(mode) web component for: \(design.prompt)
+
+            ## How to use it
+            1. Open `index.html` in a browser to preview it.
+            2. The CDN link loads Tailwind automatically — no build step needed.
+            3. Upload `index.html` to your website host and it works immediately.
+            """
         case .swiftUI:
             return """
             # InterfaceForge SwiftUI package
@@ -376,6 +446,13 @@ struct CodeExportService {
             2. Open index.html to check the design.
             3. Upload index.html and styles.css to your website host.
             4. If you already have a page, copy the section code into that page and copy the CSS into your stylesheet.
+            """
+        case .tailwind:
+            return """
+            1. Save the package.
+            2. Open index.html to check the design.
+            3. Upload index.html to your website host.
+            4. Tailwind loads from CDN, so no build tools or CSS files are needed.
             """
         case .swiftUI:
             return """

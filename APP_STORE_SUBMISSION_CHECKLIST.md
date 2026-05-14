@@ -58,11 +58,17 @@ Use this checklist to prepare, test, submit, and release the current AI-enabled 
 - [ ] Verify missing or invalid API key shows fallback/unavailable status and does not label the output as AI-powered.
 - [ ] Verify every quick-start prompt still generates a preview and export package.
 - [ ] Verify customization controls update the preview and rebuild the export package.
-- [ ] Verify React + CSS, HTML + CSS, and SwiftUI export formats generate the correct file set.
+- [ ] Verify React + CSS, HTML + CSS, Tailwind CSS, and SwiftUI export formats generate the correct file set.
+- [ ] Verify Tailwind CSS export produces a single `index.html` with CDN-loaded Tailwind (no CSS file or build step needed).
 - [ ] Verify AI-provided code fields are preferred when present and derived exports are usable when code fields are absent.
 - [ ] Verify Copy uses the clipboard and includes all generated file contents.
 - [ ] Verify Share opens the share sheet when the temporary export folder exists.
-- [ ] Verify Dynamic Type, Dark Mode, iPad max-width layouts, and VoiceOver labels for provider settings, generate, preview, export, and fallback status.
+- [ ] Verify Dynamic Type, Dark Mode, iPad max-width layouts, and VoiceOver labels for provider settings, generate, preview, export, history, prompt library, and fallback status.
+- [ ] Verify Design History auto-saves every generation — open History and confirm past designs appear.
+- [ ] Verify tapping a history design loads it into the current session for preview and export.
+- [ ] Verify clearing history works and persisted generations survive app restart.
+- [ ] Verify Prompt Library can save, edit, load, and delete named prompts.
+- [ ] Verify "Save to prompt library" button appears on the composer when prompt text is present.
 - [ ] Verify there are no broken links, placeholder metadata, debug menus, or test-only strings.
 
 ## 6. Archive and upload
