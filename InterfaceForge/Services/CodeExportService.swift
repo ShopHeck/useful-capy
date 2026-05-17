@@ -30,20 +30,29 @@ struct CodeExportService {
 
     private func reactPackage(for design: GeneratedDesign) -> ExportPackage {
         let className = cssClassName(for: design)
+        let aiReact = design.reactCode.cleanedCode
+        let aiCSS = design.cssCode.cleanedCode
         let files = [
-            ExportFile(name: "Component.jsx", contents: design.reactCode.cleanedCode ?? reactComponent(for: design, className: className)),
-            ExportFile(name: "styles.css", contents: design.cssCode.cleanedCode ?? css(for: design, className: className)),
-            ExportFile(name: "README.md", contents: readme(for: design, outputType: .react))
+            ExportFile(name: "Component.jsx", contents: provenanceComment(forAI: aiReact != nil, style: .js) + (aiReact ?? reactComponent(for: design, className: className))),
+            ExportFile(name: "styles.css", contents: provenanceComment(forAI: aiCSS != nil, style: .css) + (aiCSS ?? css(for: design, className: className))),
+            ExportFile(name: "tokens.css", contents: tokensCSS(for: design)),
+            ExportFile(name: "package.json", contents: packageJSON(for: design)),
+            ExportFile(name: "LICENSE", contents: licenseText()),
+            ExportFile(name: "README.md", contents: readme(for: design, outputType: .react, aiCount: [aiReact, aiCSS].compactMap { $0 }.count))
         ]
         return ExportPackage(packageName: packageName(for: design, suffix: "React"), outputType: .react, files: files, beginnerGuide: guide(for: .react))
     }
 
     private func htmlPackage(for design: GeneratedDesign) -> ExportPackage {
         let className = cssClassName(for: design)
+        let aiHTML = design.htmlCode.cleanedCode
+        let aiCSS = design.cssCode.cleanedCode
         let files = [
-            ExportFile(name: "index.html", contents: design.htmlCode.cleanedCode ?? html(for: design, className: className)),
-            ExportFile(name: "styles.css", contents: design.cssCode.cleanedCode ?? css(for: design, className: className)),
-            ExportFile(name: "README.md", contents: readme(for: design, outputType: .html))
+            ExportFile(name: "index.html", contents: provenanceComment(forAI: aiHTML != nil, style: .html) + (aiHTML ?? html(for: design, className: className))),
+            ExportFile(name: "styles.css", contents: provenanceComment(forAI: aiCSS != nil, style: .css) + (aiCSS ?? css(for: design, className: className))),
+            ExportFile(name: "tokens.css", contents: tokensCSS(for: design)),
+            ExportFile(name: "LICENSE", contents: licenseText()),
+            ExportFile(name: "README.md", contents: readme(for: design, outputType: .html, aiCount: [aiHTML, aiCSS].compactMap { $0 }.count))
         ]
         return ExportPackage(packageName: packageName(for: design, suffix: "HTML"), outputType: .html, files: files, beginnerGuide: guide(for: .html))
     }
@@ -51,7 +60,9 @@ struct CodeExportService {
     private func tailwindPackage(for design: GeneratedDesign) -> ExportPackage {
         let files = [
             ExportFile(name: "index.html", contents: tailwindHTML(for: design)),
-            ExportFile(name: "README.md", contents: readme(for: design, outputType: .tailwind))
+            ExportFile(name: "tailwind.config.js", contents: tailwindConfig(for: design)),
+            ExportFile(name: "LICENSE", contents: licenseText()),
+            ExportFile(name: "README.md", contents: readme(for: design, outputType: .tailwind, aiCount: 0))
         ]
         return ExportPackage(packageName: packageName(for: design, suffix: "Tailwind"), outputType: .tailwind, files: files, beginnerGuide: guide(for: .tailwind))
     }
@@ -106,11 +117,138 @@ struct CodeExportService {
     }
 
     private func swiftUIPackage(for design: GeneratedDesign) -> ExportPackage {
+        let aiSwift = design.swiftUICode.cleanedCode
         let files = [
-            ExportFile(name: "GeneratedComponent.swift", contents: design.swiftUICode.cleanedCode ?? swiftUI(for: design)),
-            ExportFile(name: "README.md", contents: readme(for: design, outputType: .swiftUI))
+            ExportFile(name: "GeneratedComponent.swift", contents: provenanceComment(forAI: aiSwift != nil, style: .swift) + (aiSwift ?? swiftUI(for: design))),
+            ExportFile(name: "Theme.swift", contents: themeSwift(for: design)),
+            ExportFile(name: "LICENSE", contents: licenseText()),
+            ExportFile(name: "README.md", contents: readme(for: design, outputType: .swiftUI, aiCount: aiSwift == nil ? 0 : 1))
         ]
         return ExportPackage(packageName: packageName(for: design, suffix: "SwiftUI"), outputType: .swiftUI, files: files, beginnerGuide: guide(for: .swiftUI))
+    }
+
+    private enum CommentStyle { case js, css, html, swift }
+
+    private func provenanceComment(forAI: Bool, style: CommentStyle) -> String {
+        let source = forAI ? "AI provider output" : "InterfaceForge template fallback (AI output unavailable for this field)"
+        let line = "InterfaceForge — source: \(source). Free to copy, modify, and ship."
+        switch style {
+        case .js, .swift: return "// \(line)\n\n"
+        case .css: return "/* \(line) */\n\n"
+        case .html: return "<!-- \(line) -->\n"
+        }
+    }
+
+    private func tokensCSS(for design: GeneratedDesign) -> String {
+        let colors = exportColors(for: design.configuration.theme)
+        let radius = Int(design.configuration.visualStyle.cornerRadius)
+        return """
+        /* InterfaceForge design tokens — share these across components for visual continuity. */
+        :root {
+          --if-color-accent: \(colors.accent);
+          --if-color-secondary: \(colors.secondary);
+          --if-color-ink: #111827;
+          --if-color-muted: #64748b;
+          --if-color-surface: rgba(255, 255, 255, 0.88);
+          --if-radius-card: \(radius)px;
+          --if-radius-control: \(max(radius - 12, 12))px;
+          --if-radius-pill: 999px;
+          --if-space-1: 4px;
+          --if-space-2: 8px;
+          --if-space-3: 12px;
+          --if-space-4: 18px;
+          --if-space-5: 28px;
+          --if-font-stack: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        """
+    }
+
+    private func themeSwift(for design: GeneratedDesign) -> String {
+        let colors = exportColors(for: design.configuration.theme)
+        let radius = Int(design.configuration.visualStyle.cornerRadius)
+        return """
+        import SwiftUI
+
+        enum InterfaceForgeTheme {
+            static let accent = Color(hex: "\(colors.accent)")
+            static let secondary = Color(hex: "\(colors.secondary)")
+            static let cardRadius: CGFloat = \(radius)
+            static let controlRadius: CGFloat = \(max(radius - 12, 12))
+        }
+
+        extension Color {
+            init(hex: String) {
+                let trimmed = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
+                var int: UInt64 = 0
+                Scanner(string: trimmed).scanHexInt64(&int)
+                let r = Double((int >> 16) & 0xff) / 255
+                let g = Double((int >> 8) & 0xff) / 255
+                let b = Double(int & 0xff) / 255
+                self.init(red: r, green: g, blue: b)
+            }
+        }
+        """
+    }
+
+    private func packageJSON(for design: GeneratedDesign) -> String {
+        let name = cssClassName(for: design)
+        let safePrompt = design.prompt
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "'")
+            .replacingOccurrences(of: "\n", with: " ")
+        return """
+        {
+          "name": "interfaceforge-\(name)",
+          "version": "0.1.0",
+          "private": true,
+          "description": "Component generated by InterfaceForge from: \(safePrompt)",
+          "main": "Component.jsx",
+          "peerDependencies": {
+            "react": ">=18",
+            "react-dom": ">=18"
+          },
+          "license": "MIT"
+        }
+        """
+    }
+
+    private func tailwindConfig(for design: GeneratedDesign) -> String {
+        let colors = exportColors(for: design.configuration.theme)
+        return """
+        /** @type {import('tailwindcss').Config} */
+        module.exports = {
+          content: ['./*.html'],
+          theme: {
+            extend: {
+              colors: {
+                'if-accent': '\(colors.accent)',
+                'if-secondary': '\(colors.secondary)'
+              }
+            }
+          },
+          plugins: []
+        };
+        """
+    }
+
+    private func licenseText() -> String {
+        """
+        MIT License
+
+        Copyright (c) \(Calendar.current.component(.year, from: Date())) Generated by InterfaceForge
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+        """
     }
 
     private func cssClassName(for design: GeneratedDesign) -> String {
@@ -376,8 +514,17 @@ struct CodeExportService {
         }
     }
 
-    private func readme(for design: GeneratedDesign, outputType: OutputType) -> String {
+    private func readme(for design: GeneratedDesign, outputType: OutputType, aiCount: Int) -> String {
         let mode = design.generationMode == .ai ? "AI-powered" : "template fallback"
+        let provenance: String
+        switch design.generationMode {
+        case .ai where aiCount > 0:
+            provenance = "Source mix: \(aiCount) file(s) returned by the AI provider, the rest scaffolded from the structured spec."
+        case .ai:
+            provenance = "Source mix: the AI provider returned the spec but no inline code, so files were scaffolded from the structured fields."
+        case .fallback:
+            provenance = "Source mix: template fallback — no AI output was used. Add or fix your API key in the AI engine card to generate unique code."
+        }
         switch outputType {
         case .react:
             return """
@@ -385,12 +532,21 @@ struct CodeExportService {
 
             This package contains one \(mode) component for: \(design.prompt)
 
+            \(provenance)
+
+            ## Files
+            - `Component.jsx` — the React component.
+            - `styles.css` — component styles.
+            - `tokens.css` — shared design tokens (colors, radii, spacing) so multiple components stay visually consistent.
+            - `package.json` — minimal manifest so you can drop the folder into a workspace or publish it.
+            - `LICENSE` — MIT, free to use.
+
             ## How to use it
-            1. Copy `Component.jsx` and `styles.css` into your React app.
-            2. Put both files in the same folder, for example `src/components/GeneratedComponent/`.
-            3. Import it with `import Component from './components/GeneratedComponent/Component';`.
+            1. Copy this folder into your React app, for example `src/components/GeneratedComponent/`.
+            2. Import the tokens once in your app entry: `import './components/GeneratedComponent/tokens.css';`.
+            3. Import the component with `import Component from './components/GeneratedComponent/Component';`.
             4. Add `<Component />` anywhere in your page.
-            5. Upload or deploy your website the same way you normally do.
+            5. Deploy your site the way you normally do.
             """
         case .html:
             return """
@@ -398,11 +554,19 @@ struct CodeExportService {
 
             This package contains one \(mode) web component for: \(design.prompt)
 
+            \(provenance)
+
+            ## Files
+            - `index.html` — open in a browser to preview.
+            - `styles.css` — component styles (consumes `tokens.css`).
+            - `tokens.css` — shared design tokens for visual continuity across pages.
+            - `LICENSE` — MIT, free to use.
+
             ## How to use it
-            1. Keep `index.html` and `styles.css` in the same folder.
+            1. Keep all three files in the same folder.
             2. Open `index.html` in a browser to preview it.
-            3. Upload both files to your website host.
-            4. To place it inside an existing page, copy the `<section>` from `index.html` and the CSS from `styles.css`.
+            3. Upload the folder to your website host.
+            4. To embed in an existing page, copy the `<section>` from `index.html`, link both stylesheets, and you're done.
             """
         case .tailwind:
             return """
@@ -410,10 +574,17 @@ struct CodeExportService {
 
             This package contains one \(mode) web component for: \(design.prompt)
 
+            \(provenance)
+
+            ## Files
+            - `index.html` — uses the Tailwind CDN, so no build step is required.
+            - `tailwind.config.js` — drop into a real Tailwind project to keep the same accent colors when you compile your own CSS.
+            - `LICENSE` — MIT, free to use.
+
             ## How to use it
             1. Open `index.html` in a browser to preview it.
-            2. The CDN link loads Tailwind automatically — no build step needed.
-            3. Upload `index.html` to your website host and it works immediately.
+            2. Upload `index.html` to your website host.
+            3. For a build-step Tailwind project, copy the colors from `tailwind.config.js` into your config to keep the brand consistent.
             """
         case .swiftUI:
             return """
@@ -421,10 +592,18 @@ struct CodeExportService {
 
             This package contains one \(mode) SwiftUI view for: \(design.prompt)
 
+            \(provenance)
+
+            ## Files
+            - `GeneratedComponent.swift` — the SwiftUI view.
+            - `Theme.swift` — shared accent colors and radii so multiple generated components stay visually consistent.
+            - `LICENSE` — MIT, free to use.
+
             ## How to use it
-            1. Drag `GeneratedComponent.swift` into your Xcode project.
+            1. Drag both Swift files into your Xcode project.
             2. Add `GeneratedComponent()` inside any SwiftUI screen.
-            3. Run your app to preview it.
+            3. Use `InterfaceForgeTheme.accent` in your own views to match the look.
+            4. Run your app.
             """
         }
     }

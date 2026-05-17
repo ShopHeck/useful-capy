@@ -78,21 +78,37 @@ Generation uses an OpenAI-compatible chat completions request through `URLSessio
 
 When a user exports, `CodeExportService` builds a small package from the generated design and selected output type. It prefers AI-provided `reactCode`, `htmlCode`, `cssCode`, and `swiftUICode` fields when present; otherwise it derives prompt-specific starter files from the structured design fields.
 
+Every package starts with a provenance header on each generated source file noting whether the contents came from the AI provider or the InterfaceForge template fallback, and the README summarises the file-level mix.
+
 For **React + CSS**, the package contains:
 
 - `Component.jsx`
 - `styles.css`
+- `tokens.css` (shared design tokens for visual continuity across multiple components)
+- `package.json`
+- `LICENSE` (MIT)
 - `README.md`
 
 For **HTML + CSS**, the package contains:
 
 - `index.html`
 - `styles.css`
+- `tokens.css`
+- `LICENSE`
+- `README.md`
+
+For **Tailwind CSS**, the package contains:
+
+- `index.html`
+- `tailwind.config.js` (drop-in colors for build-step Tailwind projects)
+- `LICENSE`
 - `README.md`
 
 For **SwiftUI**, the package contains:
 
 - `GeneratedComponent.swift`
+- `Theme.swift` (shared `InterfaceForgeTheme` so multiple generated views can reuse the same accent colors and radii)
+- `LICENSE`
 - `README.md`
 
 The export UI also writes these files to a temporary package folder for sharing and shows the same files in-app so a beginner can inspect or copy them. The included README explains where to place the files, how to import or paste the component, and how to upload or deploy in simple language.
@@ -100,7 +116,7 @@ The export UI also writes these files to a temporary package folder for sharing 
 ## Current limitations
 
 - Users must bring their own API key/provider credentials; no backend proxy, account system, billing, or hosted key management is included.
-- API keys are stored with `@AppStorage` for the MVP, not Keychain.
+- API keys are stored in the iOS Keychain (`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`). Legacy keys persisted in `UserDefaults` by earlier builds are migrated automatically on first launch. Only HTTPS endpoints are accepted; `http://` is allowed only for `localhost` during development.
 - Remote AI calls may fail because of invalid keys, endpoint/model incompatibility, quota, provider downtime, or malformed JSON; these cases return a visible template fallback.
 - Exported code is intentionally compact and beginner-friendly rather than production-framework exhaustive.
 - Shared packages are folder-based temporary exports, not zipped archives in this initial MVP.

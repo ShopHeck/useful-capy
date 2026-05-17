@@ -192,7 +192,7 @@ private struct AIEngineSettingsCard: View {
                     SectionHeader(
                         "AI provider connection",
                         eyebrow: "Your key, your provider",
-                        subtitle: "InterfaceForge calls the OpenAI-compatible chat completions endpoint you configure. The MVP stores the key on this device with app storage.",
+                        subtitle: "InterfaceForge calls the OpenAI-compatible chat completions endpoint you configure. Your API key is stored in the iOS Keychain on this device, and only HTTPS endpoints (or localhost during development) are allowed.",
                         theme: viewModel.configuration.theme
                     )
                 }
@@ -214,7 +214,7 @@ private struct AIEngineSettingsCard: View {
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .accessibilityLabel("AI provider API key")
-                            .accessibilityHint("Stored on this device with app storage for the MVP")
+                            .accessibilityHint("Stored securely in the iOS Keychain on this device")
                     }
 
                     ProviderField(
@@ -251,6 +251,25 @@ private struct AIEngineSettingsCard: View {
                     systemImage: "tag.fill",
                     theme: viewModel.configuration.theme
                 )
+
+                HStack(spacing: 8) {
+                    Button {
+                        Task { await viewModel.testConnection() }
+                    } label: {
+                        Label("Test connection", systemImage: "bolt.horizontal.fill")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(viewModel.configuration.theme.accent)
+                    .accessibilityHint("Validates that the endpoint URL is HTTPS and a key is present, without spending API credits")
+
+                    if let status = viewModel.connectionTestStatus {
+                        Text(status)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
             }
         }
     }
@@ -504,6 +523,15 @@ struct GenerationProgressView: View {
                 }
                 ProgressView(value: viewModel.generationProgress)
                     .tint(viewModel.configuration.theme.accent)
+
+                Button(role: .cancel) {
+                    viewModel.cancelGeneration()
+                } label: {
+                    Label("Cancel generation", systemImage: "xmark.circle.fill")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+                .accessibilityHint("Stops the in-flight provider request and clears progress")
             }
         }
         .onAppear { sparkle = true }

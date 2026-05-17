@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class DesignHistoryStore: ObservableObject {
     @Published var entries: [GeneratedDesign] = []
+    @Published var lastError: String?
 
     private let maxEntries: Int
     private let storageKey: String
@@ -39,13 +40,21 @@ final class DesignHistoryStore: ObservableObject {
     }
 
     private func persist() {
-        guard let data = try? JSONEncoder().encode(entries) else { return }
-        UserDefaults.standard.set(data, forKey: storageKey)
+        do {
+            let data = try JSONEncoder().encode(entries)
+            UserDefaults.standard.set(data, forKey: storageKey)
+            lastError = nil
+        } catch {
+            lastError = "Couldn't save design history: \(error.localizedDescription)"
+        }
     }
 
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let decoded = try? JSONDecoder().decode([GeneratedDesign].self, from: data) else { return }
-        entries = decoded
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
+        do {
+            entries = try JSONDecoder().decode([GeneratedDesign].self, from: data)
+        } catch {
+            lastError = "Couldn't load design history: \(error.localizedDescription). Older entries are temporarily hidden."
+        }
     }
 }
