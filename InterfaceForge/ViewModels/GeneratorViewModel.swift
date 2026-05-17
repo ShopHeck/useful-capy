@@ -7,6 +7,7 @@ final class GeneratorViewModel: ObservableObject {
     @Published var selectedTemplate: DesignTemplate?
     @Published var configuration = DesignConfiguration()
     @Published var generatedDesign: GeneratedDesign?
+    @Published var originalDesign: GeneratedDesign?
     @Published var exportPackage: ExportPackage?
     @Published var exportFolderURL: URL?
     @Published var exportError: String?
@@ -108,6 +109,7 @@ final class GeneratorViewModel: ObservableObject {
         }
 
         generatedDesign = design
+        originalDesign = design
         generationError = design.generationError
         generationStatus = design.generationStatus
         generationProgress = 1
@@ -116,6 +118,49 @@ final class GeneratorViewModel: ObservableObject {
         selectedStep = .preview
 
         historyStore?.save(design)
+    }
+
+    func updateDesignText(_ keyPath: WritableKeyPath<GeneratedDesign, String>, to value: String) {
+        guard var design = generatedDesign, design[keyPath: keyPath] != value else { return }
+        design[keyPath: keyPath] = value
+        generatedDesign = design
+        makeExportPackage(outputType: design.configuration.outputType)
+    }
+
+    func updateConfiguration(_ newValue: DesignConfiguration) {
+        if configuration != newValue { configuration = newValue }
+        guard var design = generatedDesign, design.configuration != newValue else {
+            if generatedDesign == nil { return }
+            makeExportPackage(outputType: newValue.outputType)
+            return
+        }
+        design.configuration = newValue
+        generatedDesign = design
+        makeExportPackage(outputType: newValue.outputType)
+    }
+
+    var hasEdits: Bool {
+        guard let generatedDesign, let originalDesign else { return false }
+        return generatedDesign.headline != originalDesign.headline ||
+            generatedDesign.subheadline != originalDesign.subheadline ||
+            generatedDesign.kicker != originalDesign.kicker ||
+            generatedDesign.primaryAction != originalDesign.primaryAction ||
+            generatedDesign.secondaryAction != originalDesign.secondaryAction
+    }
+
+    func resetEdits() {
+        guard let originalDesign else { return }
+        generatedDesign = originalDesign
+        configuration = originalDesign.configuration
+        makeExportPackage(outputType: originalDesign.configuration.outputType)
+    }
+
+    func cycleThemeVariant() {
+        let themes = ColorTheme.allCases
+        guard let currentIndex = themes.firstIndex(of: configuration.theme) else { return }
+        var config = configuration
+        config.theme = themes[(currentIndex + 1) % themes.count]
+        updateConfiguration(config)
     }
 
     func makeExportPackage(outputType: OutputType) {
@@ -146,6 +191,7 @@ final class GeneratorViewModel: ObservableObject {
     func resetToDescribe() {
         selectedStep = .describe
         generatedDesign = nil
+        originalDesign = nil
         exportPackage = nil
         exportFolderURL = nil
         exportError = nil

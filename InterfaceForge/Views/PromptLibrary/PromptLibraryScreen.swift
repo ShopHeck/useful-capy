@@ -18,6 +18,11 @@ struct PromptLibraryScreen: View {
                 )
                 .padding(.horizontal)
 
+                if let error = promptStore.lastError {
+                    StoreErrorBanner(message: error) { promptStore.lastError = nil }
+                        .padding(.horizontal)
+                }
+
                 if promptStore.prompts.isEmpty {
                     ContentUnavailableView(
                         "No saved prompts",

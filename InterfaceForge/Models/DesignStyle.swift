@@ -194,9 +194,9 @@ struct GeneratedDesign: Identifiable, Hashable, Codable {
     var id = UUID()
     let template: DesignTemplate
     let prompt: String
-    let configuration: DesignConfiguration
-    let headline: String
-    let subheadline: String
+    var configuration: DesignConfiguration
+    var headline: String
+    var subheadline: String
     let createdAt: Date
     var kicker: String = "Generated with InterfaceForge"
     var primaryAction: String = "Get started"

@@ -18,6 +18,8 @@ The MVP now includes an AI-powered generation path. Users provide their own Open
 - Style controls for color theme, visual style, motion level, and target output format.
 - AI generation experience with progress messages for provider analysis, JSON validation, preview assembly, and export packaging.
 - Template fallback path when AI is unavailable, with visible fallback status/error messaging.
+- Live edit panel on the preview screen for tweaking kicker, headline, subheadline, primary and secondary action copy in place — the preview and the export package rebuild as you type.
+- One-tap "Cycle theme" and "Reset edits" shortcuts on the preview screen for fast iteration without re-running generation.
 - Interactive SwiftUI previews for multiple built-in component types plus a generic adaptive AI preview for prompt-specific designs:
   - Pricing card with billing toggle and CTA state.
   - Dashboard widget with tappable metric tabs and animated values.

@@ -26,33 +26,13 @@ struct PreviewScreen: View {
                         .padding(.horizontal)
                         .transition(.scale.combined(with: .opacity))
 
+                    LiveEditPanel()
+                        .padding(.horizontal)
+
                     StyleControlsView()
                         .padding(.horizontal)
                         .onChange(of: viewModel.configuration) { _, newValue in
-                            var refreshed = GeneratedDesign(
-                                template: design.template,
-                                prompt: design.prompt,
-                                configuration: newValue,
-                                headline: design.headline,
-                                subheadline: design.subheadline,
-                                createdAt: design.createdAt,
-                                kicker: design.kicker,
-                                primaryAction: design.primaryAction,
-                                secondaryAction: design.secondaryAction,
-                                sections: design.sections,
-                                metrics: design.metrics,
-                                formFields: design.formFields,
-                                reactCode: design.reactCode,
-                                htmlCode: design.htmlCode,
-                                cssCode: design.cssCode,
-                                swiftUICode: design.swiftUICode,
-                                generationMode: design.generationMode,
-                                generationStatus: design.generationStatus,
-                                generationError: design.generationError
-                            )
-                            refreshed.generationStatus = design.generationStatus
-                            viewModel.generatedDesign = refreshed
-                            viewModel.makeExportPackage(outputType: newValue.outputType)
+                            viewModel.updateConfiguration(newValue)
                         }
 
                     NavigationLink(value: AppRoute.export) {
@@ -416,5 +396,87 @@ private struct PreviewSectionTile: View {
         .padding(14)
         .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .accessibilityElement(children: .combine)
+    }
+}
+
+private struct LiveEditPanel: View {
+    @EnvironmentObject private var viewModel: GeneratorViewModel
+
+    var body: some View {
+        GlassCard(radius: 28) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top, spacing: 12) {
+                    GradientIconBadge(systemImage: "pencil.line", theme: viewModel.configuration.theme, size: 42)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Edit live")
+                            .font(.headline)
+                        Text("Tweak the copy. The preview and the export package update as you type.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
+                EditField(label: "Kicker", placeholder: "Short eyebrow text", binding: textBinding(\.kicker))
+                EditField(label: "Headline", placeholder: "Main title", binding: textBinding(\.headline))
+                EditField(label: "Subheadline", placeholder: "Supporting copy", binding: textBinding(\.subheadline), multiline: true)
+                EditField(label: "Primary action", placeholder: "Button label", binding: textBinding(\.primaryAction))
+                EditField(label: "Secondary action", placeholder: "Link or secondary button", binding: textBinding(\.secondaryAction))
+
+                HStack(spacing: 10) {
+                    Button {
+                        viewModel.cycleThemeVariant()
+                    } label: {
+                        Label("Cycle theme", systemImage: "paintpalette.fill")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(viewModel.configuration.theme.accent)
+                    .accessibilityHint("Switches to the next color theme and rebuilds the export")
+
+                    Button(role: .destructive) {
+                        viewModel.resetEdits()
+                    } label: {
+                        Label("Reset edits", systemImage: "arrow.uturn.backward")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(!viewModel.hasEdits)
+                    .accessibilityHint("Restores the original generated copy and theme")
+                }
+            }
+        }
+    }
+
+    private func textBinding(_ keyPath: WritableKeyPath<GeneratedDesign, String>) -> Binding<String> {
+        Binding(
+            get: { viewModel.generatedDesign?[keyPath: keyPath] ?? "" },
+            set: { viewModel.updateDesignText(keyPath, to: $0) }
+        )
+    }
+}
+
+private struct EditField: View {
+    let label: String
+    let placeholder: String
+    @Binding var binding: String
+    var multiline: Bool = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.secondary)
+            if multiline {
+                TextField(placeholder, text: $binding, axis: .vertical)
+                    .lineLimit(2...4)
+                    .textFieldStyle(.roundedBorder)
+                    .accessibilityLabel(label)
+            } else {
+                TextField(placeholder, text: $binding)
+                    .textFieldStyle(.roundedBorder)
+                    .accessibilityLabel(label)
+            }
+        }
     }
 }

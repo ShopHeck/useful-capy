@@ -20,6 +20,11 @@ struct DesignHistoryScreen: View {
                 )
                 .padding(.horizontal)
 
+                if let error = historyStore.lastError {
+                    StoreErrorBanner(message: error) { historyStore.lastError = nil }
+                        .padding(.horizontal)
+                }
+
                 if historyStore.entries.isEmpty {
                     ContentUnavailableView(
                         "No saved designs",
