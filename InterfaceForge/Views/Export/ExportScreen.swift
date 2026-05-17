@@ -140,13 +140,21 @@ struct ExportScreen: View {
             .accessibilityLabel("Share package folder")
             .accessibilityHint("Opens the iOS share sheet for the generated folder")
         } else {
-            Label("Preparing share folder", systemImage: "hourglass")
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: 50)
-                .foregroundStyle(.secondary)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .accessibilityLabel("Preparing share folder")
+            VStack(alignment: .leading, spacing: 6) {
+                Label(viewModel.exportError == nil ? "Preparing share folder" : "Share folder unavailable", systemImage: viewModel.exportError == nil ? "hourglass" : "exclamationmark.triangle.fill")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 50)
+                    .foregroundStyle(viewModel.exportError == nil ? .secondary : .orange)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                if let error = viewModel.exportError {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .accessibilityLabel(viewModel.exportError == nil ? "Preparing share folder" : "Share folder unavailable")
         }
     }
 

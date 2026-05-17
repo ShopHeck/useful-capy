@@ -9,14 +9,22 @@ final class GeneratorViewModel: ObservableObject {
     @Published var generatedDesign: GeneratedDesign?
     @Published var exportPackage: ExportPackage?
     @Published var exportFolderURL: URL?
+    @Published var exportError: String?
     @Published var isGenerating = false
     @Published var progressMessage = "Reading your idea..."
     @Published var generationProgress = 0.0
     @Published var generationError: String?
     @Published var generationStatus = "Add an API key to enable AI-powered generation."
     @Published var selectedStep: FlowStep = .describe
+    @Published var connectionTestStatus: String?
 
-    @AppStorage("interfaceforge.ai.apiKey") var aiAPIKey: String = ""
+    @Published var aiAPIKey: String = "" {
+        didSet {
+            guard aiAPIKey != oldValue else { return }
+            KeychainStore.shared.set(aiAPIKey, for: .aiAPIKey)
+        }
+    }
+
     @AppStorage("interfaceforge.ai.endpoint") var aiEndpoint: String = "https://api.openai.com/v1/chat/completions"
     @AppStorage("interfaceforge.ai.model") var aiModel: String = "gpt-4.1-mini"
 
@@ -38,6 +46,12 @@ final class GeneratorViewModel: ObservableObject {
 
     private let generator = DesignGenerator()
     private let exportService = CodeExportService()
+    private var generationTask: Task<Void, Never>?
+
+    init() {
+        KeychainStore.shared.migrateLegacyDefaultsKeyIfNeeded()
+        aiAPIKey = KeychainStore.shared.string(for: .aiAPIKey)
+    }
 
     func useQuickStart(_ text: String) {
         prompt = text
@@ -46,6 +60,19 @@ final class GeneratorViewModel: ObservableObject {
     }
 
     func generate(historyStore: DesignHistoryStore? = nil) async {
+        generationTask?.cancel()
+        let task = Task { [weak self] in
+            await self?.runGeneration(historyStore: historyStore)
+        }
+        generationTask = task
+        await task.value
+    }
+
+    func cancelGeneration() {
+        generationTask?.cancel()
+    }
+
+    private func runGeneration(historyStore: DesignHistoryStore?) async {
         isGenerating = true
         generationProgress = 0
         generationError = nil
@@ -53,9 +80,16 @@ final class GeneratorViewModel: ObservableObject {
         selectedStep = .generate
 
         for index in progressMessages.indices {
+            if Task.isCancelled { break }
             progressMessage = progressMessages[index]
             generationProgress = Double(index + 1) / Double(progressMessages.count + 1)
             try? await Task.sleep(nanoseconds: 320_000_000)
+        }
+
+        if Task.isCancelled {
+            isGenerating = false
+            generationStatus = "Generation cancelled."
+            return
         }
 
         let design = await generator.generate(
@@ -66,6 +100,13 @@ final class GeneratorViewModel: ObservableObject {
             endpoint: aiEndpoint,
             model: aiModel
         )
+
+        if Task.isCancelled {
+            isGenerating = false
+            generationStatus = "Generation cancelled."
+            return
+        }
+
         generatedDesign = design
         generationError = design.generationError
         generationStatus = design.generationStatus
@@ -82,7 +123,24 @@ final class GeneratorViewModel: ObservableObject {
         guard let generatedDesign else { return }
         let package = exportService.makePackage(for: generatedDesign, outputType: outputType)
         exportPackage = package
-        exportFolderURL = try? exportService.writePackageToTemporaryFolder(package)
+        do {
+            exportFolderURL = try exportService.writePackageToTemporaryFolder(package)
+            exportError = nil
+        } catch {
+            exportFolderURL = nil
+            exportError = "Couldn't stage shareable folder: \(error.localizedDescription). You can still copy code from the file previews."
+        }
+    }
+
+    func testConnection() async {
+        let key = aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !key.isEmpty else {
+            connectionTestStatus = "Add an API key first."
+            return
+        }
+        connectionTestStatus = "Testing endpoint..."
+        let result = await generator.validateEndpoint(endpoint: aiEndpoint, apiKey: key)
+        connectionTestStatus = result
     }
 
     func resetToDescribe() {
@@ -90,6 +148,7 @@ final class GeneratorViewModel: ObservableObject {
         generatedDesign = nil
         exportPackage = nil
         exportFolderURL = nil
+        exportError = nil
         generationProgress = 0
         generationError = nil
         generationStatus = aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Add an API key to enable AI-powered generation." : "AI engine configured."

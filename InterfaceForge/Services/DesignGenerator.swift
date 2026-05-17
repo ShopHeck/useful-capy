@@ -42,10 +42,29 @@ struct DesignGenerator {
         }
     }
 
-    private func requestAISpec(prompt: String, selectedTemplate: DesignTemplate?, configuration: DesignConfiguration, apiKey: String, endpoint: String, model: String) async throws -> AIDesignSpec {
-        guard let url = URL(string: endpoint.trimmingCharacters(in: .whitespacesAndNewlines)), url.scheme?.hasPrefix("http") == true else {
+    func validateEndpoint(endpoint: String, apiKey: String) async -> String {
+        guard let _ = try? parseSecureURL(endpoint) else {
+            return "Endpoint must be a valid https:// URL (http:// is only allowed for localhost)."
+        }
+        if apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "Add an API key first."
+        }
+        return "Endpoint looks valid. A real request runs when you generate."
+    }
+
+    private func parseSecureURL(_ endpoint: String) throws -> URL {
+        let trimmed = endpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed), let scheme = url.scheme?.lowercased(), let host = url.host?.lowercased() else {
             throw GenerationError.invalidEndpoint
         }
+        if scheme == "https" { return url }
+        let localHosts: Set<String> = ["localhost", "127.0.0.1", "::1"]
+        if scheme == "http" && localHosts.contains(host) { return url }
+        throw GenerationError.insecureEndpoint
+    }
+
+    private func requestAISpec(prompt: String, selectedTemplate: DesignTemplate?, configuration: DesignConfiguration, apiKey: String, endpoint: String, model: String) async throws -> AIDesignSpec {
+        let url = try parseSecureURL(endpoint)
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -253,10 +272,32 @@ struct DesignGenerator {
             text = text.replacingOccurrences(of: "```", with: "")
             text = text.trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        if let first = text.firstIndex(of: "{"), let last = text.lastIndex(of: "}"), first <= last {
-            return String(text[first...last])
+        guard let start = text.firstIndex(of: "{") else { return text }
+        var depth = 0
+        var inString = false
+        var escape = false
+        var index = start
+        while index < text.endIndex {
+            let character = text[index]
+            if escape {
+                escape = false
+            } else if character == "\\" && inString {
+                escape = true
+            } else if character == "\"" {
+                inString.toggle()
+            } else if !inString {
+                if character == "{" {
+                    depth += 1
+                } else if character == "}" {
+                    depth -= 1
+                    if depth == 0 {
+                        return String(text[start...index])
+                    }
+                }
+            }
+            index = text.index(after: index)
         }
-        return text
+        return String(text[start...])
     }
 }
 
@@ -345,6 +386,7 @@ private struct AIDesignSpec: Decodable {
 
 private enum GenerationError: LocalizedError {
     case invalidEndpoint
+    case insecureEndpoint
     case invalidResponse
     case apiFailed(String)
     case emptyResponse
@@ -354,6 +396,7 @@ private enum GenerationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidEndpoint: return "The AI endpoint URL is invalid."
+        case .insecureEndpoint: return "The AI endpoint must use https:// to keep your API key safe (http:// is only allowed for localhost)."
         case .invalidResponse: return "The AI provider returned an invalid response."
         case .apiFailed(let message): return message
         case .emptyResponse: return "The AI provider did not return message content."
