@@ -6,6 +6,7 @@ struct ComposerView: View {
     @EnvironmentObject private var promptStore: PromptLibraryStore
     @EnvironmentObject private var storeKit: StoreKitManager
     @EnvironmentObject private var usageTracker: UsageTracker
+    @State private var showScreenshotImport = false
 
     private var canGenerate: Bool {
         !viewModel.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.selectedTemplate != nil
@@ -28,6 +29,18 @@ struct ComposerView: View {
 
                 promptCard
                     .padding(.horizontal)
+
+                // Screenshot-to-component import
+                Button { showScreenshotImport = true } label: {
+                    SecondaryLinkRow(
+                        title: "Import from screenshot",
+                        subtitle: "Take a photo or pick a screenshot — AI vision will describe the UI and fill in your prompt.",
+                        systemImage: "camera.viewfinder",
+                        theme: viewModel.configuration.theme
+                    )
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal)
 
                 AIEngineSettingsCard()
                     .padding(.horizontal)
@@ -62,6 +75,9 @@ struct ComposerView: View {
         .navigationTitle("Create")
         .navigationBarTitleDisplayMode(.inline)
         .appBackground(theme: viewModel.configuration.theme)
+        .sheet(isPresented: $showScreenshotImport) {
+            NavigationStack { ScreenshotImportView() }
+        }
         .onAppear { viewModel.selectedStep = .describe }
     }
 

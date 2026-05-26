@@ -41,6 +41,11 @@
 		F200000200000001 /* WebPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E200000200000001 /* WebPreviewView.swift */; };
 		F200000200000002 /* RefinementBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E200000200000002 /* RefinementBar.swift */; };
 		F200000200000003 /* CloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E200000200000003 /* CloudSyncService.swift */; };
+		F300000300000001 /* AdaptiveRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E300000300000001 /* AdaptiveRootView.swift */; };
+		F300000300000002 /* VisionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E300000300000002 /* VisionService.swift */; };
+		F300000300000003 /* ScreenshotImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E300000300000003 /* ScreenshotImportView.swift */; };
+		F300000300000004 /* GalleryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E300000300000004 /* GalleryService.swift */; };
+		F300000300000005 /* GalleryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E300000300000005 /* GalleryScreen.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +84,11 @@
 		E200000200000001 /* WebPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPreviewView.swift; sourceTree = "<group>"; };
 		E200000200000002 /* RefinementBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinementBar.swift; sourceTree = "<group>"; };
 		E200000200000003 /* CloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncService.swift; sourceTree = "<group>"; };
+		E300000300000001 /* AdaptiveRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveRootView.swift; sourceTree = "<group>"; };
+		E300000300000002 /* VisionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionService.swift; sourceTree = "<group>"; };
+		E300000300000003 /* ScreenshotImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotImportView.swift; sourceTree = "<group>"; };
+		E300000300000004 /* GalleryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryService.swift; sourceTree = "<group>"; };
+		E300000300000005 /* GalleryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryScreen.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +162,8 @@
 				C200000100000002 /* StoreKitManager.swift */,
 				C200000100000003 /* ProxyService.swift */,
 				E200000200000003 /* CloudSyncService.swift */,
+				E300000300000002 /* VisionService.swift */,
+				E300000300000004 /* GalleryService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -267,6 +279,14 @@
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
+		E300000300000099 /* Gallery */ = {
+			isa = PBXGroup;
+			children = (
+				E300000300000005 /* GalleryScreen.swift */,
+			);
+			path = Gallery;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -369,6 +389,11 @@
 				F200000200000001 /* WebPreviewView.swift in Sources */,
 				F200000200000002 /* RefinementBar.swift in Sources */,
 				F200000200000003 /* CloudSyncService.swift in Sources */,
+				F300000300000001 /* AdaptiveRootView.swift in Sources */,
+				F300000300000002 /* VisionService.swift in Sources */,
+				F300000300000003 /* ScreenshotImportView.swift in Sources */,
+				F300000300000004 /* GalleryService.swift in Sources */,
+				F300000300000005 /* GalleryScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
