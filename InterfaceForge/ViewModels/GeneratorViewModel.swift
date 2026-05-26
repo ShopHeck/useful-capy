@@ -83,6 +83,56 @@ final class GeneratorViewModel: ObservableObject {
         await task.value
     }
 
+    // MARK: - Iterative refinement
+
+    @Published var refinementPrompt: String = ""
+    @Published var isRefining = false
+
+    func refine(historyStore: DesignHistoryStore? = nil, storeKit: StoreKitManager? = nil, usage: UsageTracker? = nil) async {
+        guard let existingDesign = generatedDesign else { return }
+        let prompt = refinementPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !prompt.isEmpty else { return }
+
+        isRefining = true
+        generationStatus = "Refining component..."
+
+        let isPro = storeKit?.isPro ?? false
+        let effectiveKey: String
+        let effectiveEndpoint: String
+        let effectiveModel: String
+
+        if isPro && ProxyService.isConfigured, let proxyURL = ProxyService.baseURL {
+            effectiveKey = "pro-proxy-token"
+            effectiveEndpoint = proxyURL.absoluteString
+            effectiveModel = ProxyService.defaultModel
+        } else {
+            effectiveKey = aiAPIKey
+            effectiveEndpoint = aiEndpoint
+            effectiveModel = aiModel
+        }
+
+        let refined = await generator.refine(
+            existingDesign: existingDesign,
+            refinementPrompt: prompt,
+            apiKey: effectiveKey,
+            endpoint: effectiveEndpoint,
+            model: effectiveModel
+        )
+
+        generatedDesign = refined
+        generationError = refined.generationError
+        generationStatus = refined.generationStatus
+        makeExportPackage(outputType: configuration.outputType)
+
+        if !isPro {
+            usage?.recordGeneration()
+        }
+
+        historyStore?.save(refined)
+        refinementPrompt = ""
+        isRefining = false
+    }
+
     func cancelGeneration() {
         generationTask?.cancel()
     }

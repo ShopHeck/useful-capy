@@ -62,6 +62,7 @@ struct DesignHistoryScreen: View {
             PreviewScreen()
         }
         .appBackground(theme: viewModel.configuration.theme)
+        .task { await historyStore.syncFromCloud() }
         .confirmationDialog("Clear all history?", isPresented: $confirmClear, titleVisibility: .visible) {
             Button("Clear all", role: .destructive) {
                 withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
@@ -75,19 +76,65 @@ struct DesignHistoryScreen: View {
     }
 
     private var actionBar: some View {
-        HStack {
-            Text("\(historyStore.entries.count) design\(historyStore.entries.count == 1 ? "" : "s")")
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(.secondary)
-            Spacer()
-            Button(role: .destructive) {
-                confirmClear = true
-            } label: {
-                Label("Clear all", systemImage: "trash")
-                    .font(.caption.weight(.semibold))
+        VStack(spacing: 10) {
+            HStack {
+                Text("\(historyStore.entries.count) design\(historyStore.entries.count == 1 ? "" : "s")")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+
+                Button {
+                    Task { await historyStore.syncFromCloud() }
+                } label: {
+                    Label("Sync", systemImage: cloudSyncIcon)
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+                .tint(viewModel.configuration.theme.accent)
+                .disabled(historyStore.cloudSync.syncStatus == .syncing)
+
+                Button(role: .destructive) {
+                    confirmClear = true
+                } label: {
+                    Label("Clear all", systemImage: "trash")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+                .tint(.orange)
             }
-            .buttonStyle(.bordered)
-            .tint(.orange)
+
+            // Sync status
+            if case .unavailable(let msg) = historyStore.cloudSync.syncStatus {
+                HStack(spacing: 6) {
+                    Image(systemName: "icloud.slash")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                    Text(msg)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else if case .synced = historyStore.cloudSync.syncStatus, let date = historyStore.cloudSync.lastSyncDate {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.icloud")
+                        .font(.caption2)
+                        .foregroundStyle(.green)
+                    Text("Synced \(date, style: .relative) ago")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private var cloudSyncIcon: String {
+        switch historyStore.cloudSync.syncStatus {
+        case .syncing: return "arrow.triangle.2.circlepath.icloud"
+        case .synced: return "checkmark.icloud"
+        case .unavailable: return "icloud.slash"
+        case .error: return "exclamationmark.icloud"
+        case .idle: return "icloud.and.arrow.down"
         }
     }
 

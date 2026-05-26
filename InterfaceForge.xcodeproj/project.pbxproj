@@ -38,6 +38,9 @@
 		D200000100000003 /* ProxyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000100000003 /* ProxyService.swift */; };
 		D200000100000004 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000100000004 /* PaywallView.swift */; };
 		D200000100000005 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000100000005 /* OnboardingView.swift */; };
+		F200000200000001 /* WebPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E200000200000001 /* WebPreviewView.swift */; };
+		F200000200000002 /* RefinementBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E200000200000002 /* RefinementBar.swift */; };
+		F200000200000003 /* CloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E200000200000003 /* CloudSyncService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -73,6 +76,9 @@
 		C200000100000003 /* ProxyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyService.swift; sourceTree = "<group>"; };
 		C200000100000004 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		C200000100000005 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		E200000200000001 /* WebPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPreviewView.swift; sourceTree = "<group>"; };
+		E200000200000002 /* RefinementBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefinementBar.swift; sourceTree = "<group>"; };
+		E200000200000003 /* CloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +151,7 @@
 				B10000010000000600000001 /* KeychainStore.swift */,
 				C200000100000002 /* StoreKitManager.swift */,
 				C200000100000003 /* ProxyService.swift */,
+				E200000200000003 /* CloudSyncService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -359,6 +366,9 @@
 				D200000100000003 /* ProxyService.swift in Sources */,
 				D200000100000004 /* PaywallView.swift in Sources */,
 				D200000100000005 /* OnboardingView.swift in Sources */,
+				F200000200000001 /* WebPreviewView.swift in Sources */,
+				F200000200000002 /* RefinementBar.swift in Sources */,
+				F200000200000003 /* CloudSyncService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
