@@ -14,7 +14,7 @@ struct InterfaceForgeApp: App {
         WindowGroup {
             Group {
                 if hasCompletedOnboarding {
-                    RootView()
+                    AdaptiveRootView()
                 } else {
                     OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
                 }
