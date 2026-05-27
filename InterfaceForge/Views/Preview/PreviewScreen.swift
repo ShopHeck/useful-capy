@@ -2,6 +2,10 @@ import SwiftUI
 
 struct PreviewScreen: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
+    @EnvironmentObject private var historyStore: DesignHistoryStore
+    @EnvironmentObject private var storeKit: StoreKitManager
+    @EnvironmentObject private var usageTracker: UsageTracker
+    @State private var showWebPreview = false
 
     var body: some View {
         ScrollView {
@@ -25,6 +29,26 @@ struct PreviewScreen: View {
                     InteractiveComponentView(design: design)
                         .padding(.horizontal)
                         .transition(.scale.combined(with: .opacity))
+
+                    // Refinement bar
+                    RefinementBar()
+                        .padding(.horizontal)
+
+                    // Web preview link
+                    Button {
+                        showWebPreview = true
+                    } label: {
+                        SecondaryLinkRow(
+                            title: "Open live web preview",
+                            subtitle: "Render the HTML+CSS export in a real web view to check responsive layout and interactions.",
+                            systemImage: "safari.fill",
+                            theme: viewModel.configuration.theme
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal)
+                    .accessibilityLabel("Open live web preview")
+                    .accessibilityHint("Shows the generated HTML in a WebKit browser view")
 
                     StyleControlsView()
                         .padding(.horizontal)
@@ -80,6 +104,17 @@ struct PreviewScreen: View {
         .navigationTitle("Preview")
         .navigationBarTitleDisplayMode(.inline)
         .appBackground(theme: viewModel.configuration.theme)
+        .sheet(isPresented: $showWebPreview) {
+            NavigationStack {
+                WebPreviewView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { showWebPreview = false }
+                                .font(.subheadline.weight(.semibold))
+                        }
+                    }
+            }
+        }
         .onAppear { viewModel.selectedStep = .preview }
     }
 }

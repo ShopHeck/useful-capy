@@ -10,9 +10,24 @@ struct DesignGenerator {
         let keywordMatches: [(keywords: [String], id: String)] = [
             (["pricing", "plan", "subscription", "saas"], "pricing-card"),
             (["dashboard", "metric", "chart", "analytics", "widget"], "dashboard-widget"),
-            (["onboarding", "hero", "welcome", "feature"], "onboarding-hero"),
-            (["checkout", "form", "contact", "payment", "email", "waitlist", "signup"], "checkout-form"),
-            (["portfolio", "project", "case study", "gallery"], "portfolio-card")
+            (["onboarding", "hero", "welcome"], "onboarding-hero"),
+            (["checkout", "payment"], "checkout-form"),
+            (["portfolio", "project", "case study"], "portfolio-card"),
+            (["testimonial", "review", "social proof", "quote"], "testimonial-carousel"),
+            (["feature grid", "features list", "feature list"], "feature-grid"),
+            (["cta", "call to action", "banner"], "cta-banner"),
+            (["blog", "article", "post"], "blog-card"),
+            (["login", "sign in", "auth"], "login-screen"),
+            (["settings", "preferences", "config"], "settings-panel"),
+            (["stats", "counter", "numbers"], "stats-overview"),
+            (["notification", "toast", "alert", "snackbar"], "notification-toast"),
+            (["team", "roster", "about us", "founders"], "team-roster"),
+            (["faq", "question", "accordion"], "faq-accordion"),
+            (["gallery", "photos", "images", "masonry"], "image-gallery"),
+            (["timeline", "roadmap", "changelog"], "timeline-feed"),
+            (["newsletter", "email signup", "subscribe", "waitlist", "signup"], "email-signup"),
+            (["comparison", "versus", "compare", "table"], "comparison-table"),
+            (["empty state", "no data", "placeholder"], "empty-state")
         ]
 
         for match in keywordMatches where match.keywords.contains(where: { lowercasedPrompt.contains($0) }) {
@@ -40,6 +55,78 @@ struct DesignGenerator {
         } catch {
             return fallbackDesign(prompt: requestPrompt, template: fallbackTemplate, configuration: configuration, reason: "AI generation failed, so InterfaceForge built a clearly labeled template fallback.", error: "AI generation failed: \(error.localizedDescription)")
         }
+    }
+
+    /// Iterative refinement: takes an existing design and a follow-up prompt to produce an updated design.
+    func refine(existingDesign: GeneratedDesign, refinementPrompt: String, apiKey: String, endpoint: String, model: String) async -> GeneratedDesign {
+        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedKey.isEmpty else {
+            var copy = existingDesign
+            copy.generationError = "Add an API key to enable refinement."
+            return copy
+        }
+
+        do {
+            let spec = try await requestRefinement(existingDesign: existingDesign, refinementPrompt: refinementPrompt, apiKey: trimmedKey, endpoint: endpoint, model: model)
+            let fallbackTemplate = matchedTemplate(for: existingDesign.prompt, selectedTemplate: nil)
+            var refined = design(from: spec, prompt: existingDesign.prompt, selectedTemplate: nil, fallbackTemplate: fallbackTemplate, configuration: existingDesign.configuration)
+            refined.generationStatus = "Refined via AI: \(refinementPrompt.prefix(60))"
+            return refined
+        } catch {
+            var copy = existingDesign
+            copy.generationError = "Refinement failed: \(error.localizedDescription)"
+            return copy
+        }
+    }
+
+    private func requestRefinement(existingDesign: GeneratedDesign, refinementPrompt: String, apiKey: String, endpoint: String, model: String) async throws -> AIDesignSpec {
+        let url = try parseSecureURL(endpoint)
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 45
+
+        let existingContext = """
+        Current component: \(existingDesign.template.title)
+        Headline: \(existingDesign.headline)
+        Subheadline: \(existingDesign.subheadline)
+        Sections: \(existingDesign.sections.map { "\($0.title): \($0.detail)" }.joined(separator: "; "))
+        Metrics: \(existingDesign.metrics.map { "\($0.label): \($0.value)" }.joined(separator: "; "))
+        """
+
+        let body = ChatCompletionRequest(
+            model: model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "gpt-4.1-mini" : model,
+            messages: [
+                ChatMessage(role: "system", content: systemPrompt),
+                ChatMessage(role: "user", content: userPrompt(prompt: existingDesign.prompt, selectedTemplate: nil, configuration: existingDesign.configuration)),
+                ChatMessage(role: "assistant", content: "Here is the current design spec:\n\(existingContext)"),
+                ChatMessage(role: "user", content: "Refine this component: \(refinementPrompt). Keep the same JSON shape. Update only what the user asked for; preserve everything else.")
+            ],
+            temperature: 0.75,
+            responseFormat: ResponseFormat(type: "json_object")
+        )
+        request.httpBody = try JSONEncoder().encode(body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw GenerationError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let body = String(data: data, encoding: .utf8) ?? "HTTP \(httpResponse.statusCode)"
+            throw GenerationError.apiFailed(String(body.prefix(240)))
+        }
+
+        let completion = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)
+        guard let content = completion.choices.first?.message.content else {
+            throw GenerationError.emptyResponse
+        }
+        let json = extractJSON(from: content)
+        guard let jsonData = json.data(using: .utf8) else {
+            throw GenerationError.invalidJSON
+        }
+        return try JSONDecoder().decode(AIDesignSpec.self, from: jsonData)
     }
 
     func validateEndpoint(endpoint: String, apiKey: String) async -> String {
