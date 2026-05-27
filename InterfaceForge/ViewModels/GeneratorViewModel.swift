@@ -22,6 +22,9 @@ final class GeneratorViewModel: ObservableObject {
         didSet {
             guard aiAPIKey != oldValue else { return }
             KeychainStore.shared.set(aiAPIKey, for: .aiAPIKey)
+            if !aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                AnalyticsService.shared.track(.apiKeySet)
+            }
         }
     }
 
@@ -57,6 +60,7 @@ final class GeneratorViewModel: ObservableObject {
         prompt = text
         selectedTemplate = generator.matchedTemplate(for: text, selectedTemplate: nil)
         selectedStep = .describe
+        AnalyticsService.shared.track(.quickStartTap, properties: ["prompt": String(text.prefix(60))])
     }
 
     // MARK: - Entitlement-aware generation
@@ -131,10 +135,13 @@ final class GeneratorViewModel: ObservableObject {
         historyStore?.save(refined)
         refinementPrompt = ""
         isRefining = false
+
+        AnalyticsService.shared.track(.refine)
     }
 
     func cancelGeneration() {
         generationTask?.cancel()
+        AnalyticsService.shared.track(.cancelGeneration)
     }
 
     private func runGeneration(historyStore: DesignHistoryStore?, storeKit: StoreKitManager?, usage: UsageTracker?) async {
@@ -208,6 +215,14 @@ final class GeneratorViewModel: ObservableObject {
         isGenerating = false
         selectedStep = .preview
 
+        // Analytics
+        AnalyticsService.shared.track(.generate)
+        if design.generationMode == .ai {
+            AnalyticsService.shared.track(.generateAI)
+        } else {
+            AnalyticsService.shared.track(.generateFallback)
+        }
+
         // Track usage for free tier
         if !isPro {
             usage?.recordGeneration()
@@ -221,6 +236,15 @@ final class GeneratorViewModel: ObservableObject {
         guard let generatedDesign else { return }
         let package = exportService.makePackage(for: generatedDesign, outputType: outputType)
         exportPackage = package
+
+        // Track export event with format
+        AnalyticsService.shared.track(.export)
+        switch outputType {
+        case .react:    AnalyticsService.shared.track(.exportReact)
+        case .html:     AnalyticsService.shared.track(.exportHTML)
+        case .tailwind: AnalyticsService.shared.track(.exportTailwind)
+        case .swiftUI:  AnalyticsService.shared.track(.exportSwiftUI)
+        }
         do {
             exportFolderURL = try exportService.writePackageToTemporaryFolder(package)
             exportError = nil
@@ -239,6 +263,7 @@ final class GeneratorViewModel: ObservableObject {
         connectionTestStatus = "Testing endpoint..."
         let result = await generator.validateEndpoint(endpoint: aiEndpoint, apiKey: key)
         connectionTestStatus = result
+        AnalyticsService.shared.track(.connectionTest)
     }
 
     func resetToDescribe() {

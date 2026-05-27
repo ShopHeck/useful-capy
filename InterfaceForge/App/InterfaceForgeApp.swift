@@ -7,6 +7,7 @@ struct InterfaceForgeApp: App {
     @StateObject private var promptStore = PromptLibraryStore()
     @StateObject private var storeKitManager = StoreKitManager()
     @StateObject private var usageTracker = UsageTracker()
+    @StateObject private var analytics = AnalyticsService.shared
 
     @AppStorage("interfaceforge.hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
@@ -24,6 +25,7 @@ struct InterfaceForgeApp: App {
             .environmentObject(promptStore)
             .environmentObject(storeKitManager)
             .environmentObject(usageTracker)
+            .environmentObject(analytics)
         }
     }
 }

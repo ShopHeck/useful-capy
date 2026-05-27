@@ -46,6 +46,9 @@
 		F300000300000003 /* ScreenshotImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E300000300000003 /* ScreenshotImportView.swift */; };
 		F300000300000004 /* GalleryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E300000300000004 /* GalleryService.swift */; };
 		F300000300000005 /* GalleryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E300000300000005 /* GalleryScreen.swift */; };
+		G400000500000001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = H400000500000001 /* AnalyticsService.swift */; };
+		G400000500000002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = H400000500000002 /* PrivacyInfo.xcprivacy */; };
+		G400000500000003 /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = H400000500000003 /* Products.storekit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -89,6 +92,10 @@
 		E300000300000003 /* ScreenshotImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotImportView.swift; sourceTree = "<group>"; };
 		E300000300000004 /* GalleryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryService.swift; sourceTree = "<group>"; };
 		E300000300000005 /* GalleryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryScreen.swift; sourceTree = "<group>"; };
+		H400000500000001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		H400000500000002 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		H400000500000003 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
+		H400000500000004 /* InterfaceForge.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InterfaceForge.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +129,9 @@
 			isa = PBXGroup;
 			children = (
 				0CF0F1A7C47BC9A263E04EDB /* Assets.xcassets */,
+				H400000500000002 /* PrivacyInfo.xcprivacy */,
+				H400000500000003 /* Products.storekit */,
+				H400000500000004 /* InterfaceForge.entitlements */,
 				9CDA1A2A3C984A24B9C429CA /* App */,
 				42DB0B956AF67442931A4C45 /* Models */,
 				55E1DB7E9E779F6BEE9CD564 /* Services */,
@@ -164,6 +174,7 @@
 				E200000200000003 /* CloudSyncService.swift */,
 				E300000300000002 /* VisionService.swift */,
 				E300000300000004 /* GalleryService.swift */,
+				H400000500000001 /* AnalyticsService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -346,6 +357,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A74A7B7DA884F8F17F90CF50 /* Assets.xcassets in Resources */,
+				G400000500000002 /* PrivacyInfo.xcprivacy in Resources */,
+				G400000500000003 /* Products.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -394,6 +407,7 @@
 				F300000300000003 /* ScreenshotImportView.swift in Sources */,
 				F300000300000004 /* GalleryService.swift in Sources */,
 				F300000300000005 /* GalleryScreen.swift in Sources */,
+				G400000500000001 /* AnalyticsService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,8 +506,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = InterfaceForge/InterfaceForge.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -508,6 +524,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.capy.interfaceforge;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -518,8 +536,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = InterfaceForge/InterfaceForge.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -534,6 +554,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.capy.interfaceforge;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
