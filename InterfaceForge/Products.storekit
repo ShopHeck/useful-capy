@@ -1,0 +1,80 @@
+{
+  "identifier" : "com.capy.interfaceforge.storekit",
+  "type" : "Configuration",
+  "version" : 3,
+  "subscriptionGroups" : [
+    {
+      "id" : "A1000001",
+      "localizations" : [
+        {
+          "description" : "InterfaceForge Pro",
+          "displayName" : "InterfaceForge Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "InterfaceForge Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "S1000001",
+          "introductoryOffer" : {
+            "displayPrice" : "0.00",
+            "internalID" : "IO1000001",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Unlimited AI generations, hosted AI — no API key needed, iterative refinement, community gallery, CloudKit sync, priority model access.",
+              "displayName" : "Pro Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.capy.interfaceforge.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Pro Monthly",
+          "subscriptionGroupID" : "A1000001",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "49.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "S1000002",
+          "introductoryOffer" : {
+            "displayPrice" : "0.00",
+            "internalID" : "IO1000002",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Unlimited AI generations, hosted AI — no API key needed, iterative refinement, community gallery, CloudKit sync, priority model access. Save 40% vs monthly.",
+              "displayName" : "Pro Yearly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.capy.interfaceforge.pro.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Pro Yearly",
+          "subscriptionGroupID" : "A1000001",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storeKitErrors" : [],
+    "_timeRate" : 6
+  }
+}
