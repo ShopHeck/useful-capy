@@ -1,0 +1,21 @@
+name = "interfaceforge-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# KV namespace for rate limiting & receipt cache
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "" # Replace with your KV namespace ID after `wrangler kv:namespace create RATE_LIMIT`
+
+[vars]
+# Default upstream model — can be overridden per-request
+DEFAULT_MODEL = "gpt-4.1-mini"
+# Rate limit: requests per day for Pro subscribers
+DAILY_RATE_LIMIT = "200"
+# App bundle ID for receipt validation
+APP_BUNDLE_ID = "com.capy.interfaceforge"
+
+# Set these secrets via `wrangler secret put <NAME>`:
+#   OPENAI_API_KEY        — your org's OpenAI API key
+#   APPLE_SHARED_SECRET   — App Store Connect shared secret (for receipt validation)

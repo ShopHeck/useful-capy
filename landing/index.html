@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InterfaceForge — AI UI Components from a Text Prompt</title>
+  <meta name="description" content="Describe any UI component in plain English and get production-ready code in React, Tailwind, HTML, or SwiftUI. The native iOS design tool for building interfaces at the speed of thought.">
+  <meta name="theme-color" content="#0a0b10">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="InterfaceForge — AI UI Components from a Text Prompt">
+  <meta property="og:description" content="Describe it. Generate it. Export production code. The fastest way to go from idea to interface.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="./assets/og-image.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ════════════════════ NAV ════════════════════ -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner container">
+      <a href="#" class="nav-logo">
+        <span class="logo-icon">⚒</span>
+        <span class="logo-text">InterfaceForge</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <a href="#download" class="nav-cta btn btn-sm btn-primary">Download</a>
+    </div>
+  </nav>
+
+  <!-- ════════════════════ HERO ════════════════════ -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-glow hero-glow--secondary"></div>
+    <div class="container hero-inner">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Native iOS &middot; SwiftUI &middot; No Dependencies
+      </div>
+      <h1 class="hero-title">
+        Describe a UI.<br>
+        <span class="gradient-text">Get production code.</span>
+      </h1>
+      <p class="hero-subtitle">
+        InterfaceForge turns plain-English prompts into polished UI components — exported as React, Tailwind, HTML&nbsp;+&nbsp;CSS, or SwiftUI. 
+        Ideate on your phone. Ship from your desktop.
+      </p>
+      <div class="hero-actions">
+        <a href="#download" class="btn btn-primary btn-lg">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.3 10.7a3.83 3.83 0 011.82-3.22A3.93 3.93 0 0013 5.8a3.76 3.76 0 00-1.77.91 3.75 3.75 0 00-1.77-.91 3.93 3.93 0 00-3.12 1.68 3.84 3.84 0 001.82 3.22c-.27.8-.64 1.52-1.12 2.18A11.78 11.78 0 005.5 15.2c.58.61 1.25.8 2 .8.76 0 1.58-.38 2.5-1.14.92.76 1.74 1.14 2.5 1.14.75 0 1.42-.19 2-.8a11.78 11.78 0 00-1.54-2.32c-.48-.66-.85-1.38-1.12-2.18z" fill="currentColor"/></svg>
+          Download for iOS
+        </a>
+        <a href="#how-it-works" class="btn btn-ghost btn-lg">See how it works →</a>
+      </div>
+      <div class="hero-proof">
+        <div class="proof-item">
+          <span class="proof-value">20</span>
+          <span class="proof-label">Templates</span>
+        </div>
+        <div class="proof-divider"></div>
+        <div class="proof-item">
+          <span class="proof-value">4</span>
+          <span class="proof-label">Export Formats</span>
+        </div>
+        <div class="proof-divider"></div>
+        <div class="proof-item">
+          <span class="proof-value">0</span>
+          <span class="proof-label">Dependencies</span>
+        </div>
+        <div class="proof-divider"></div>
+        <div class="proof-item">
+          <span class="proof-value">iOS 17+</span>
+          <span class="proof-label">Native SwiftUI</span>
+        </div>
+      </div>
+    </div>
+    <!-- App mockup area -->
+    <div class="hero-device-wrap">
+      <div class="device-frame">
+        <div class="device-screen">
+          <div class="mock-app">
+            <div class="mock-header">
+              <div class="mock-icon">⚒</div>
+              <div>
+                <div class="mock-title">InterfaceForge</div>
+                <div class="mock-sub">Create an interface</div>
+              </div>
+            </div>
+            <div class="mock-prompt-card">
+              <div class="mock-label">Your prompt</div>
+              <div class="mock-typing">
+                <span class="typing-text">A waitlist hero for a space tourism startup with signup form and safety stats</span>
+                <span class="typing-cursor"></span>
+              </div>
+            </div>
+            <div class="mock-chips">
+              <span class="mock-chip active">Aurora</span>
+              <span class="mock-chip">Soft glass</span>
+              <span class="mock-chip">React + CSS</span>
+            </div>
+            <div class="mock-generate-btn">✦ Generate with AI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ LOGOS / FORMATS ════════════════════ -->
+  <section class="formats-bar">
+    <div class="container">
+      <p class="formats-label">Export production-ready code in</p>
+      <div class="formats-list">
+        <div class="format-tag"><code>&lt;/&gt;</code> React + CSS</div>
+        <div class="format-tag"><code>⚡</code> Tailwind CSS</div>
+        <div class="format-tag"><code>🌐</code> HTML + CSS</div>
+        <div class="format-tag"><code>🍎</code> SwiftUI</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ FEATURES ════════════════════ -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Capabilities</span>
+        <h2 class="section-title">Everything you need to go<br>from idea to interface</h2>
+        <p class="section-subtitle">A complete AI design workflow — prompt, generate, refine, preview, export — all in a single native app.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card feature-card--hero">
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">✦</div>
+          </div>
+          <h3>AI generation from text</h3>
+          <p>Describe any component in plain language. The AI interprets layout, content, style, and structure — then generates a complete, interactive UI.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">🔄</div>
+          </div>
+          <h3>Iterative refinement</h3>
+          <p>"Make it darker." "Add a testimonial." Follow-up prompts let you refine without starting over. Multi-turn conversation keeps context.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">👁</div>
+          </div>
+          <h3>Live web preview</h3>
+          <p>See your generated component rendered in a real WKWebView — toggle between mobile, tablet, and desktop viewports instantly.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">📸</div>
+          </div>
+          <h3>Screenshot → component</h3>
+          <p>Snap a photo of any UI or pick from your library. GPT-4o vision analyzes the layout and auto-fills your prompt. Reverse-engineer any design.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">📦</div>
+          </div>
+          <h3>Multi-format export</h3>
+          <p>Export complete starter projects with design tokens, README, and LICENSE. React, Tailwind, vanilla HTML, or SwiftUI — one tap each.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">🌐</div>
+          </div>
+          <h3>Community gallery</h3>
+          <p>Browse, fork, and remix designs shared by the community. Every shared component includes the original prompt so you can learn and iterate.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">☁️</div>
+          </div>
+          <h3>CloudKit sync</h3>
+          <p>Your design history and prompt library sync across all your Apple devices. Pick up on iPad where you left off on iPhone.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <div class="feature-icon">🎨</div>
+          </div>
+          <h3>20 starter templates</h3>
+          <p>Pricing cards, dashboards, onboarding heroes, checkout forms, portfolios, login screens, FAQ accordions, and more — all customizable.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ HOW IT WORKS ════════════════════ -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Workflow</span>
+        <h2 class="section-title">Three steps. One app.</h2>
+        <p class="section-subtitle">InterfaceForge collapses the design-to-code loop into a single, streamlined flow.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <div class="step-content">
+            <h3>Describe</h3>
+            <p>Type a plain-English prompt, pick a template, or snap a screenshot. Choose your theme, style, and export format.</p>
+          </div>
+          <div class="step-visual">
+            <div class="step-mockup">
+              <div class="mock-input-line">"A pricing card for a developer tools SaaS with 3 tiers"</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <div class="step-content">
+            <h3>Generate &amp; Refine</h3>
+            <p>AI generates the full component. Preview it live, then iterate with follow-up prompts until it's exactly right.</p>
+          </div>
+          <div class="step-visual">
+            <div class="step-mockup">
+              <div class="mock-result">
+                <div class="mock-result-bar"></div>
+                <div class="mock-result-bar short"></div>
+                <div class="mock-result-bar medium"></div>
+                <div class="mock-result-dots">✦ AI-generated</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <div class="step-content">
+            <h3>Export</h3>
+            <p>One tap exports a complete starter project — code, tokens, README, LICENSE — in your chosen framework. Drop into your codebase and ship.</p>
+          </div>
+          <div class="step-visual">
+            <div class="step-mockup">
+              <div class="mock-export">
+                <code class="export-line">├── Component.tsx</code>
+                <code class="export-line">├── styles.css</code>
+                <code class="export-line">├── tokens.json</code>
+                <code class="export-line dim">└── README.md</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ PRICING ════════════════════ -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Plans</span>
+        <h2 class="section-title">Start free. Go Pro when you're ready.</h2>
+        <p class="section-subtitle">No credit card required. Bring your own API key on Free, or let us handle everything on Pro.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-tier">Free</div>
+          <div class="pricing-price">
+            <span class="price-amount">$0</span>
+            <span class="price-period">forever</span>
+          </div>
+          <p class="pricing-desc">For exploration and personal projects. Bring your own OpenAI-compatible API key.</p>
+          <ul class="pricing-features">
+            <li>3 generations per day</li>
+            <li>All 20 templates</li>
+            <li>All 4 export formats</li>
+            <li>Bring your own API key</li>
+            <li>Local design history</li>
+            <li>Screenshot import</li>
+          </ul>
+          <a href="#download" class="btn btn-ghost btn-block">Get Started</a>
+        </div>
+        <div class="pricing-card pricing-card--pro">
+          <div class="pricing-popular">Most Popular</div>
+          <div class="pricing-tier">Pro</div>
+          <div class="pricing-price">
+            <span class="price-amount">$6.99</span>
+            <span class="price-period">/month</span>
+          </div>
+          <p class="pricing-desc">For designers and developers who ship daily. No API key needed — we handle the AI.</p>
+          <ul class="pricing-features">
+            <li><strong>Unlimited</strong> generations</li>
+            <li>Hosted AI — no key needed</li>
+            <li>Iterative refinement</li>
+            <li>Community gallery access</li>
+            <li>CloudKit sync across devices</li>
+            <li>Priority model access</li>
+            <li>All Free features included</li>
+          </ul>
+          <a href="#download" class="btn btn-primary btn-block">Start Pro Trial</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ FAQ ════════════════════ -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">FAQ</span>
+        <h2 class="section-title">Common questions</h2>
+      </div>
+      <div class="faq-grid">
+        <details class="faq-item">
+          <summary>What AI model does InterfaceForge use?</summary>
+          <p>Pro subscribers use our hosted endpoint powered by GPT-4.1 Mini — no configuration needed. Free users can connect any OpenAI-compatible API (OpenAI, Anthropic via proxy, local models, etc.) by entering their own endpoint and key.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is the generated code production-ready?</summary>
+          <p>The exported code is clean, well-structured starter code with proper component architecture, design tokens, and responsive layout. It's designed to drop into an existing project and customize — not a pixel-perfect final product, but a major head start.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What if I don't have an API key?</summary>
+          <p>InterfaceForge works without any API key. Without one, it generates using on-device template fallbacks — clearly labeled. Upgrade to Pro to use our hosted AI with no setup, or add your own key on Free.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Does it work on iPad and Mac?</summary>
+          <p>Yes. InterfaceForge includes a dedicated iPad split-view layout with sidebar navigation. macOS support via Catalyst is coming soon — the iPad layout runs natively on Mac.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What export formats are supported?</summary>
+          <p>React + CSS, Tailwind CSS, HTML + CSS, and SwiftUI. Each export includes the component code, a design tokens file, a README, and a LICENSE. More formats are planned.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is my data private?</summary>
+          <p>Prompts are sent only to your configured AI provider (or our proxy for Pro). Design history syncs via your private iCloud container — we never see it. The app collects no analytics or personal data.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I cancel Pro anytime?</summary>
+          <p>Yes. Pro is a standard App Store subscription. Cancel anytime in your Apple ID settings. You keep Pro access until the end of your billing period, then revert to Free with no data loss.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How is this different from v0.dev / Bolt / Galileo?</summary>
+          <p>Those are web-based tools for desktop workflows. InterfaceForge is the only native iOS app focused on mobile-first UI ideation. Snap a screenshot on your phone, generate a component, preview it, refine it, and export code — all without opening a browser.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ FINAL CTA ════════════════════ -->
+  <section class="final-cta" id="download">
+    <div class="container">
+      <div class="cta-glow"></div>
+      <h2 class="cta-title">Ready to forge<br><span class="gradient-text">your next interface?</span></h2>
+      <p class="cta-subtitle">Download InterfaceForge and go from idea to production code in seconds. Free to start — no account required.</p>
+      <div class="cta-actions">
+        <a href="#" class="app-store-badge" aria-label="Download on the App Store">
+          <svg viewBox="0 0 120 40" width="156" height="52">
+            <rect width="120" height="40" rx="6" fill="#000"/>
+            <text x="42" y="14" fill="#fff" font-size="7" font-family="Inter, system-ui, sans-serif">Download on the</text>
+            <text x="42" y="27" fill="#fff" font-size="13" font-weight="700" font-family="Inter, system-ui, sans-serif">App Store</text>
+            <text x="16" y="25" fill="#fff" font-size="18">🍎</text>
+          </svg>
+        </a>
+      </div>
+      <p class="cta-note">Requires iOS 17 or later. iPhone and iPad.</p>
+    </div>
+  </section>
+
+  <!-- ════════════════════ FOOTER ════════════════════ -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="logo-icon">⚒</span>
+        <span class="logo-text">InterfaceForge</span>
+      </div>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Support</a>
+      </div>
+      <p class="footer-copy">&copy; 2025 InterfaceForge. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
