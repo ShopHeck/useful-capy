@@ -59,10 +59,25 @@ final class GeneratorViewModel: ObservableObject {
         selectedStep = .describe
     }
 
-    func generate(historyStore: DesignHistoryStore? = nil) async {
+    // MARK: - Entitlement-aware generation
+
+    /// Check whether the user can generate right now.
+    /// Returns a human-readable reason string if blocked, or nil if allowed.
+    func generationBlockReason(storeKit: StoreKitManager, usage: UsageTracker) -> String? {
+        if storeKit.isPro { return nil }
+        let hasKey = !aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        if hasKey && usage.canGenerateForFree { return nil }
+        if hasKey && !usage.canGenerateForFree {
+            return "You've used all \(UsageTracker.freeGenerationsPerDay) free generations today. Upgrade to Pro for unlimited."
+        }
+        // No key and not pro
+        return nil // still allow generation — will fall back to template
+    }
+
+    func generate(historyStore: DesignHistoryStore? = nil, storeKit: StoreKitManager? = nil, usage: UsageTracker? = nil) async {
         generationTask?.cancel()
         let task = Task { [weak self] in
-            await self?.runGeneration(historyStore: historyStore)
+            await self?.runGeneration(historyStore: historyStore, storeKit: storeKit, usage: usage)
         }
         generationTask = task
         await task.value
@@ -72,11 +87,22 @@ final class GeneratorViewModel: ObservableObject {
         generationTask?.cancel()
     }
 
-    private func runGeneration(historyStore: DesignHistoryStore?) async {
+    private func runGeneration(historyStore: DesignHistoryStore?, storeKit: StoreKitManager?, usage: UsageTracker?) async {
         isGenerating = true
         generationProgress = 0
         generationError = nil
-        generationStatus = aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "AI unavailable until an API key is saved; a labeled fallback will be generated." : "Contacting the configured AI provider."
+
+        let isPro = storeKit?.isPro ?? false
+        let hasKey = !aiAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+        if isPro && ProxyService.isConfigured {
+            generationStatus = "Generating via Pro hosted AI."
+        } else if hasKey {
+            generationStatus = "Contacting the configured AI provider."
+        } else {
+            generationStatus = "AI unavailable until an API key is saved; a labeled fallback will be generated."
+        }
+
         selectedStep = .generate
 
         for index in progressMessages.indices {
@@ -92,13 +118,30 @@ final class GeneratorViewModel: ObservableObject {
             return
         }
 
+        // Determine which key and endpoint to use
+        let effectiveKey: String
+        let effectiveEndpoint: String
+        let effectiveModel: String
+
+        if isPro && ProxyService.isConfigured, let proxyURL = ProxyService.baseURL {
+            // Pro users go through the hosted proxy
+            effectiveKey = "pro-proxy-token"  // The proxy handles auth via receipt
+            effectiveEndpoint = proxyURL.absoluteString
+            effectiveModel = ProxyService.defaultModel
+        } else {
+            // BYOK flow (free tier or proxy not configured)
+            effectiveKey = aiAPIKey
+            effectiveEndpoint = aiEndpoint
+            effectiveModel = aiModel
+        }
+
         let design = await generator.generate(
             prompt: prompt,
             selectedTemplate: selectedTemplate,
             configuration: configuration,
-            apiKey: aiAPIKey,
-            endpoint: aiEndpoint,
-            model: aiModel
+            apiKey: effectiveKey,
+            endpoint: effectiveEndpoint,
+            model: effectiveModel
         )
 
         if Task.isCancelled {
@@ -114,6 +157,11 @@ final class GeneratorViewModel: ObservableObject {
         makeExportPackage(outputType: configuration.outputType)
         isGenerating = false
         selectedStep = .preview
+
+        // Track usage for free tier
+        if !isPro {
+            usage?.recordGeneration()
+        }
 
         historyStore?.save(design)
     }

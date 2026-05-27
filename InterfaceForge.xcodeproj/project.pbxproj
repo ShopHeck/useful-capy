@@ -33,6 +33,11 @@
 		A10000010000000400000001 /* DesignHistoryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000010000000400000001 /* DesignHistoryScreen.swift */; };
 		A10000010000000500000001 /* PromptLibraryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000010000000500000001 /* PromptLibraryScreen.swift */; };
 		A10000010000000600000001 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000010000000600000001 /* KeychainStore.swift */; };
+		D200000100000001 /* Entitlement.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000100000001 /* Entitlement.swift */; };
+		D200000100000002 /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000100000002 /* StoreKitManager.swift */; };
+		D200000100000003 /* ProxyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000100000003 /* ProxyService.swift */; };
+		D200000100000004 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000100000004 /* PaywallView.swift */; };
+		D200000100000005 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000100000005 /* OnboardingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,6 +68,11 @@
 		B10000010000000400000001 /* DesignHistoryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignHistoryScreen.swift; sourceTree = "<group>"; };
 		B10000010000000500000001 /* PromptLibraryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptLibraryScreen.swift; sourceTree = "<group>"; };
 		B10000010000000600000001 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		C200000100000001 /* Entitlement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entitlement.swift; sourceTree = "<group>"; };
+		C200000100000002 /* StoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitManager.swift; sourceTree = "<group>"; };
+		C200000100000003 /* ProxyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyService.swift; sourceTree = "<group>"; };
+		C200000100000004 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		C200000100000005 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +130,7 @@
 				5D2CCE8038A39D5E0853964B /* DesignStyle.swift */,
 				CBEE3772A077021721A278F6 /* ExportPackage.swift */,
 				B10000010000000100000001 /* SavedPrompt.swift */,
+				C200000100000001 /* Entitlement.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -132,6 +143,8 @@
 				B10000010000000200000001 /* DesignHistoryStore.swift */,
 				B10000010000000300000001 /* PromptLibraryStore.swift */,
 				B10000010000000600000001 /* KeychainStore.swift */,
+				C200000100000002 /* StoreKitManager.swift */,
+				C200000100000003 /* ProxyService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -155,6 +168,8 @@
 				E24BCA87305FC388E69F6342 /* Shared */,
 				G10000010000000400000001 /* History */,
 				G10000010000000500000001 /* PromptLibrary */,
+				H200000100000001 /* Paywall */,
+				H200000100000002 /* Onboarding */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -227,6 +242,22 @@
 				B10000010000000500000001 /* PromptLibraryScreen.swift */,
 			);
 			path = PromptLibrary;
+			sourceTree = "<group>";
+		};
+		H200000100000001 /* Paywall */ = {
+			isa = PBXGroup;
+			children = (
+				C200000100000004 /* PaywallView.swift */,
+			);
+			path = Paywall;
+			sourceTree = "<group>";
+		};
+		H200000100000002 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				C200000100000005 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -323,6 +354,11 @@
 				4C6428DA8099F4EFBACEA67C /* PortfolioCardPreview.swift in Sources */,
 				C2ACAF127972D33E5901A19B /* ForgePrimitives.swift in Sources */,
 				B9D8E96CF37CB990C801F97B /* FlowLayout.swift in Sources */,
+				D200000100000001 /* Entitlement.swift in Sources */,
+				D200000100000002 /* StoreKitManager.swift in Sources */,
+				D200000100000003 /* ProxyService.swift in Sources */,
+				D200000100000004 /* PaywallView.swift in Sources */,
+				D200000100000005 /* OnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

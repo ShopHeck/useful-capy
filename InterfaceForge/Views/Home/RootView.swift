@@ -18,6 +18,8 @@ struct RootView: View {
                         DesignHistoryScreen()
                     case .promptLibrary:
                         PromptLibraryScreen()
+                    case .paywall:
+                        PaywallView()
                     }
                 }
         }
@@ -31,4 +33,5 @@ enum AppRoute: Hashable {
     case export
     case history
     case promptLibrary
+    case paywall
 }

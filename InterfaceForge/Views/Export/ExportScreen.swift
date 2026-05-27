@@ -3,8 +3,10 @@ import UIKit
 
 struct ExportScreen: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
+    @EnvironmentObject private var storeKit: StoreKitManager
     @State private var selectedFileID: ExportFile.ID?
     @State private var copied = false
+    @State private var showPaywall = false
 
     var body: some View {
         ScrollView {
@@ -27,8 +29,13 @@ struct ExportScreen: View {
                     PackageSummary(package: package)
                         .padding(.horizontal)
 
-                    actionBar(package: package)
-                        .padding(.horizontal)
+                    if storeKit.isPro {
+                        actionBar(package: package)
+                            .padding(.horizontal)
+                    } else {
+                        proExportGate
+                            .padding(.horizontal)
+                    }
 
                     BeginnerGuideCard(package: package)
                         .padding(.horizontal)
@@ -47,9 +54,33 @@ struct ExportScreen: View {
         .navigationTitle("Export")
         .navigationBarTitleDisplayMode(.inline)
         .appBackground(theme: viewModel.configuration.theme)
+        .sheet(isPresented: $showPaywall) {
+            NavigationStack {
+                PaywallView()
+            }
+        }
         .onAppear {
             viewModel.selectedStep = .export
             viewModel.makeExportPackage(outputType: viewModel.configuration.outputType)
+        }
+    }
+
+    private var proExportGate: some View {
+        GlassCard(radius: 28) {
+            VStack(spacing: 16) {
+                GradientIconBadge(systemImage: "crown.fill", theme: viewModel.configuration.theme, size: 50)
+                Text("Export is a Pro feature")
+                    .font(.title3.weight(.black))
+                Text("You can preview the generated files above, but copying and sharing requires a Pro subscription.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                PrimaryButton(title: "Unlock Pro", systemImage: "crown.fill", theme: viewModel.configuration.theme) {
+                    showPaywall = true
+                }
+            }
+            .frame(maxWidth: .infinity)
         }
     }
 

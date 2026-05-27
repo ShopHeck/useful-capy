@@ -2,6 +2,8 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
+    @EnvironmentObject private var storeKit: StoreKitManager
+    @EnvironmentObject private var usageTracker: UsageTracker
 
     var body: some View {
         ScrollView {
@@ -87,6 +89,35 @@ struct HomeView: View {
             }
             .accessibilityLabel("Create with AI")
             .accessibilityHint("Opens the guided prompt composer and provider settings")
+
+            if storeKit.isPro {
+                StatusBadge(title: "Pro", detail: "Unlimited generations", systemImage: "crown.fill", tint: viewModel.configuration.theme.accent)
+            } else {
+                NavigationLink(value: AppRoute.paywall) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "crown.fill")
+                            .foregroundStyle(viewModel.configuration.theme.accent)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Upgrade to Pro")
+                                .font(.caption.weight(.black))
+                            Text("Unlimited AI generations · No API key needed")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 11)
+                    .background(.thinMaterial, in: Capsule())
+                    .overlay(Capsule().stroke(viewModel.configuration.theme.accent.opacity(0.3), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Upgrade to Pro")
+                .accessibilityHint("Opens the subscription screen")
+            }
 
             FlowLayout(spacing: 8) {
                 MetricPill(title: "Provider key", detail: "You control access", systemImage: "key.fill", theme: viewModel.configuration.theme)

@@ -4,6 +4,8 @@ struct ComposerView: View {
     @EnvironmentObject private var viewModel: GeneratorViewModel
     @EnvironmentObject private var historyStore: DesignHistoryStore
     @EnvironmentObject private var promptStore: PromptLibraryStore
+    @EnvironmentObject private var storeKit: StoreKitManager
+    @EnvironmentObject private var usageTracker: UsageTracker
 
     private var canGenerate: Bool {
         !viewModel.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.selectedTemplate != nil
@@ -158,9 +160,30 @@ struct ComposerView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     PrimaryButton(title: "Generate interface", systemImage: "wand.and.stars", theme: viewModel.configuration.theme, isEnabled: canGenerate) {
                         guard canGenerate else { return }
-                        Task { await viewModel.generate(historyStore: historyStore) }
+                        Task { await viewModel.generate(historyStore: historyStore, storeKit: storeKit, usage: usageTracker) }
                     }
                     .accessibilityHint(canGenerate ? "Sends the prompt to the configured provider when an API key is available, otherwise creates a labeled template fallback" : "Add a prompt or select a template first")
+
+                    // Free-tier usage indicator
+                    if !storeKit.isPro {
+                        HStack(spacing: 8) {
+                            Image(systemName: "sparkle")
+                                .foregroundStyle(usageTracker.canGenerateForFree ? viewModel.configuration.theme.accent : .orange)
+                            Text("\(usageTracker.freeGenerationsRemaining) free generation\(usageTracker.freeGenerationsRemaining == 1 ? "" : "s") left today")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            NavigationLink(value: AppRoute.paywall) {
+                                Text("Go Pro")
+                                    .font(.caption.weight(.black))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(viewModel.configuration.theme.gradient, in: Capsule())
+                            }
+                        }
+                        .padding(.top, 4)
+                    }
 
                     GenerationStatusView()
 
