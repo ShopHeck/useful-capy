@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support — InterfaceForge</title>
+  <meta name="description" content="Get help with InterfaceForge. FAQs, troubleshooting, and contact information.">
+  <meta name="theme-color" content="#0a0b10">
+
+  <link rel="icon" type="image/png" sizes="180x180" href="./assets/favicon-180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .support-page { padding: 10rem 0 6rem; }
+    .support-page h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .support-page .support-lead { color: var(--color-text-secondary); font-size: 1.1rem; margin-bottom: 3rem; max-width: 600px; }
+    .support-page h2 { font-size: 1.3rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 0.75rem; color: var(--color-text); }
+    .support-page p, .support-page li { color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 1rem; }
+    .support-page ul, .support-page ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    .support-page ul li, .support-page ol li { margin-bottom: 0.5rem; }
+    .support-page a { color: var(--color-accent); }
+    .support-page code { font-family: var(--font-mono); background: var(--glass-bg-2); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.9em; }
+    .support-page .support-content { max-width: 720px; }
+
+    .contact-card {
+      background: var(--glass-bg-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+    .contact-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    .contact-card p {
+      margin-bottom: 0.5rem;
+    }
+
+    .troubleshoot-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .troubleshoot-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--color-text);
+    }
+    .troubleshoot-card p {
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav scrolled" id="nav">
+    <div class="nav-inner container">
+      <a href="./" class="nav-logo">
+        <span class="logo-icon">⚒</span>
+        <span class="logo-text">InterfaceForge</span>
+      </a>
+      <div class="nav-links">
+        <a href="./#features">Features</a>
+        <a href="./#pricing">Pricing</a>
+        <a href="./support.html">Support</a>
+      </div>
+      <a href="./#download" class="nav-cta btn btn-sm btn-primary">Download</a>
+    </div>
+  </nav>
+
+  <section class="support-page">
+    <div class="container">
+      <div class="support-content">
+        <h1>Support</h1>
+        <p class="support-lead">Need help with InterfaceForge? Check the common issues below, or reach out directly.</p>
+
+        <h2>Common Issues</h2>
+
+        <div class="troubleshoot-card">
+          <h3>🔑 "Add an API key first"</h3>
+          <p>Open <strong>Settings</strong> (gear icon on Home screen) and paste your OpenAI API key. The key must start with <code>sk-</code>. Tap <strong>Test Connection</strong> to verify it works.</p>
+          <p>If you're a Pro subscriber, generation works without a key — make sure your subscription is active in Settings → Manage Subscription.</p>
+        </div>
+
+        <div class="troubleshoot-card">
+          <h3>⚠️ Generation fails or returns an error</h3>
+          <p>Check these things:</p>
+          <ol>
+            <li>Your API key is valid and has available credits</li>
+            <li>The endpoint URL is correct (default: <code>https://api.openai.com</code>)</li>
+            <li>You have an internet connection</li>
+            <li>Try tapping <strong>Test Connection</strong> in Settings</li>
+          </ol>
+          <p>If using a custom endpoint (local model, proxy), make sure it supports the OpenAI chat completions format.</p>
+        </div>
+
+        <div class="troubleshoot-card">
+          <h3>📱 Template fallback instead of AI generation</h3>
+          <p>If the app shows <em>"Template fallback — AI unavailable"</em>, it means the AI endpoint couldn't be reached. The app generates a clearly labeled template result instead. To get AI results, verify your API key and connection in Settings.</p>
+        </div>
+
+        <div class="troubleshoot-card">
+          <h3>🔄 iCloud sync not working</h3>
+          <p>Make sure iCloud is enabled on your device: <strong>Settings → Apple ID → iCloud → Apps Using iCloud</strong>. InterfaceForge syncs via your private CloudKit container. Sync may take a few minutes after first launch.</p>
+        </div>
+
+        <div class="troubleshoot-card">
+          <h3>💳 Subscription not recognized</h3>
+          <p>If you purchased Pro but the app still shows Free limits:</p>
+          <ol>
+            <li>Open InterfaceForge → Settings → tap <strong>Restore Purchases</strong></li>
+            <li>Make sure you're signed in with the Apple ID used for the purchase</li>
+            <li>Close and reopen the app</li>
+          </ol>
+          <p>Apple subscription changes can take a few minutes to propagate.</p>
+        </div>
+
+        <div class="troubleshoot-card">
+          <h3>📤 Export files won't open</h3>
+          <p>Exported packages are shared as a folder via the iOS Share Sheet. If you're AirDropping to a Mac, the files arrive in your Downloads folder. Each export includes the component code, design tokens, a README, and a LICENSE file.</p>
+        </div>
+
+        <h2>Managing Your Subscription</h2>
+        <p>InterfaceForge Pro is an auto-renewable subscription managed through the App Store. To change or cancel:</p>
+        <ol>
+          <li>Open <strong>Settings</strong> on your iPhone or iPad</li>
+          <li>Tap your name → <strong>Subscriptions</strong></li>
+          <li>Select <strong>InterfaceForge</strong></li>
+          <li>Change plan or tap <strong>Cancel Subscription</strong></li>
+        </ol>
+        <p>You keep Pro access until the end of your current billing period. No data is lost when downgrading to Free.</p>
+
+        <h2>Feature Requests &amp; Bug Reports</h2>
+        <p>We'd love to hear from you. When reporting a bug, please include:</p>
+        <ul>
+          <li>Your device model and iOS version</li>
+          <li>What you were doing when the issue occurred</li>
+          <li>The exact error message (if any)</li>
+          <li>Whether you're using BYOK or Pro hosted AI</li>
+        </ul>
+
+        <div class="contact-card">
+          <h3>📧 Contact Us</h3>
+          <p><strong>Email:</strong> <a href="mailto:support@shopheck.com">support@shopheck.com</a></p>
+          <p>We typically respond within 24 hours on business days.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="logo-icon">⚒</span>
+        <span class="logo-text">InterfaceForge</span>
+      </div>
+      <div class="footer-links">
+        <a href="./privacy.html">Privacy Policy</a>
+        <a href="./support.html">Support</a>
+      </div>
+      <p class="footer-copy">&copy; 2025 InterfaceForge. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

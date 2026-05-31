@@ -83,10 +83,11 @@ Productivity
 © 2025 InterfaceForge
 
 ## Support URL
-https://interfaceforge.app/support
+<!-- Replace <your-pages-subdomain> with your Cloudflare Pages subdomain once deployed -->
+https://<your-pages-subdomain>.pages.dev/support.html
 
 ## Marketing URL
-https://interfaceforge.app
+https://<your-pages-subdomain>.pages.dev/
 
 ## Privacy Policy URL
-https://interfaceforge.app/privacy
+https://<your-pages-subdomain>.pages.dev/privacy.html
